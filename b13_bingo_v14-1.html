@@ -1,0 +1,2515 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>B13 Bingo</title>
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Noto+Sans+Ethiopic:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--mk:linear-gradient(145deg,#f87171,#dc2626);--cf:14px}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:#121212;color:#e5e5e5;font-family:'Inter','Noto Sans Ethiopic',system-ui,sans-serif}
+.grad{background:linear-gradient(90deg,#2563eb,#7c3aed,#9333ea)}
+.glass{background:#1e1e1e;border:1px solid #2c2c2c;border-radius:18px}
+.card{background:#1e1e1e;color:#e5e5e5;border-radius:18px;border:1px solid #2c2c2c}
+.inp{width:100%;padding:12px 14px;border-radius:14px;border:1.5px solid #333;background:#262626;color:#fff;font-size:15px}
+.inp:focus{outline:none;border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.25)}
+.btn{padding:12px;border-radius:14px;font-weight:800;color:#fff;width:100%;border:0;position:relative}
+.btn:active{transform:scale(.97)}
+.btn.loading{opacity:.75;pointer-events:none}
+.btn.loading::after{content:"";position:absolute;width:18px;height:18px;top:50%;left:50%;margin:-9px 0 0 -9px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.b-p{background:linear-gradient(135deg,#4f46e5,#9333ea)}.b-ok{background:linear-gradient(135deg,#10b981,#059669)}.b-bad{background:linear-gradient(135deg,#f87171,#dc2626)}.b-gold{background:linear-gradient(135deg,#fbbf24,#f97316);color:#1e1b4b}.b-gray{background:#3a3a3a}
+.sm{padding:8px 12px;font-size:12px;width:auto;border-radius:10px}
+#app{min-height:100dvh}
+header.grad{position:sticky;top:0;z-index:40}
+main{padding:6px 4px 8px}
+#cards{padding:0 0 96px;gap:8px!important}
+#app.bf{height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+#app.bf>header{flex:none}
+#app.bf #topWrap{flex:none;max-height:50dvh;overflow-y:auto;overscroll-behavior:contain}
+#app.bf main{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+#app.bf #pg-bingo{flex:1;min-height:0;display:flex;flex-direction:column}
+#app.bf #cards{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;align-content:start;grid-auto-rows:max-content}
+#cards>.pc{min-height:max-content}
+.stat{display:flex;align-items:center;gap:10px;border-radius:16px;padding:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08)}
+.stat .ic{width:34px;height:34px;flex:none;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:17px}
+html.light .stat{background:#fff;border-color:#e2e2e8}
+.lgsel{padding:8px 18px;border-radius:99px;font-weight:800;font-size:13px;color:#fff;background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.45);text-align:center}
+.lgsel option{color:#111}
+.lgb{padding:6px 12px;border-radius:99px;font-size:12px;font-weight:800;border:1.5px solid rgba(255,255,255,.35);color:#fff;background:rgba(255,255,255,.1)}
+.lgb.on{background:#fff;color:#4f46e5;border-color:#fff}
+html.light .glass .lgb{color:#4f46e5;border-color:#c7c9f5;background:#f3f4ff}
+html.light .glass .lgb.on{background:#4f46e5;color:#fff}
+.otp{width:60px;height:64px;text-align:center;font-size:26px;font-weight:800;padding:0}
+.brow{display:flex;gap:2px;margin-bottom:3px;align-items:center}
+.brow b{width:22px;height:22px;flex:none;border-radius:6px;font-size:11px;display:flex;align-items:center;justify-content:center;border:1.5px solid}
+.num{flex:1;min-width:0;aspect-ratio:1;border-radius:7px;background:#3a3a3a;color:#c4c4c4;font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.num.d-B{background:#1d63d6;color:#fff}.num.d-I{background:#dc2626;color:#fff}.num.d-N{background:#2f8f3a;color:#fff}.num.d-G{background:#6d28d9;color:#fff}.num.d-O{background:#ea6a0c;color:#fff}
+.num.last{outline:3px solid #3b82f6;outline-offset:0;position:relative;z-index:2;box-shadow:0 0 10px 2px rgba(59,130,246,.7)}
+#tBall{display:none!important}
+.sball{width:50px;height:50px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:17px;box-shadow:inset -5px -7px 12px rgba(0,0,0,.35),inset 4px 5px 8px rgba(255,255,255,.28),0 4px 10px rgba(0,0,0,.45)}
+.sball.big{width:74px;height:74px;font-size:22px}
+.sball.B{background:#1d63d6}.sball.I{background:#d32f2f}.sball.N{background:#2e8b3a}.sball.G{background:#7b2fd6}.sball.O{background:#f0700c}
+.cell.called{background:radial-gradient(circle at 35% 30%,#e8e9ee,#b7b9c3);color:#1c1c22;border-color:#eceef2}
+@keyframes numglow{from{box-shadow:0 0 3px 1px rgba(253,224,71,.55);transform:scale(1)}to{box-shadow:0 0 16px 6px rgba(253,224,71,.95),0 0 28px 12px rgba(250,204,21,.45);transform:scale(1.2)}}
+.ball{width:34px;height:34px;border-radius:50%;flex:none;color:#fff;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;box-shadow:inset -3px -4px 8px rgba(0,0,0,.3)}
+.ball.B{background:#2563eb}.ball.I{background:#dc2626}.ball.N{background:#16a34a}.ball.G{background:#7c3aed}.ball.O{background:#ea580c}
+.pc{background:#232323;border:3px solid #5b34c9;border-radius:18px;overflow:hidden;box-shadow:0 10px 26px rgba(91,52,201,.28)}
+.pc.win{border-color:#10b981;box-shadow:0 0 14px rgba(16,185,129,.5)}
+.pc.sel{border-color:#fbbf24;box-shadow:0 0 14px rgba(251,191,36,.6)}
+.ph{background:#6d28d9;color:#fff;padding:5px 10px;display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:15px}
+.pl{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;padding:0 4px 3px}
+.pl div{color:#fff;font-weight:800;font-size:12px;text-align:center;border-radius:7px;padding:3px 0}
+.pg{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;padding:2px 4px 6px}
+.cell{aspect-ratio:1;border-radius:50%;border:2px solid #3d3d3d;background:radial-gradient(circle at 35% 30%,#2e2e38,#1b1b22);color:#e5e5e5;font-weight:700;font-size:var(--cf);display:flex;align-items:center;justify-content:center;padding:0;box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 2px 5px rgba(0,0,0,.45)}
+.cell.mk{background:var(--mk);color:#fff;border-color:transparent;box-shadow:0 0 10px rgba(255,255,255,.18)}
+@keyframes mk{0%{transform:scale(.7)}60%{transform:scale(1.12)}100%{transform:scale(1)}}
+.cell.fr{background:linear-gradient(145deg,#34d399,#059669);color:#fff;border:0}
+.pc.lock .cell{opacity:.4}
+.tag{display:inline-block;padding:7px 18px;border-radius:99px;font-size:13px;font-weight:800;border:0;color:#fff;background:#4a4a4a;max-width:96%;box-shadow:0 4px 12px rgba(0,0,0,.35)}
+.t-reg{background:#2563eb}.t-ok{background:#16a34a}.t-no{background:#3f3f3f;color:#fca5a5}
+.drawer{transform:translateX(100%);transition:transform .3s}.drawer.open{transform:none}
+.fade{animation:fd .3s ease-out}@keyframes fd{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.mbg{background:rgba(0,0,0,.72);backdrop-filter:blur(5px)}
+.hidden{display:none!important}
+.chip{padding:6px 12px;border-radius:10px;font-weight:800;font-size:13px;color:#fff}
+.chip.gr{background:#16a34a}.chip.rd{background:#fff1f2;color:#dc2626;border:1.5px solid #f87171}.chip.am{background:#f59e0b;color:#111}
+#splash{background:linear-gradient(160deg,#0a1628,#1e3a8a 40%,#5b21b6 80%,#3b0764)}
+body{background:radial-gradient(900px 500px at 0% -5%,rgba(99,102,241,.22),transparent 60%),radial-gradient(800px 500px at 100% 0%,rgba(217,70,239,.16),transparent 60%),#0d0d12;background-attachment:fixed}
+.grad{background:linear-gradient(100deg,#2563eb,#6d28d9 55%,#c026d3);box-shadow:0 6px 24px rgba(109,40,217,.35)}
+.glass{background:linear-gradient(160deg,rgba(255,255,255,.07),rgba(255,255,255,.02));backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.09);box-shadow:0 8px 28px rgba(0,0,0,.35)}
+#boardBox{background:#17171d;box-shadow:0 8px 14px rgba(0,0,0,.35)}
+#fabWrap>button{box-shadow:0 10px 30px rgba(244,67,54,.6)}
+.tg{width:52px;height:30px;border-radius:99px;background:#3a3a3a;position:relative;flex:none;border:0}
+.tg::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#aaa;transition:.2s}
+.tg.on{background:#2f5d8a}.tg.on::after{left:25px;background:#60a5fa}
+.otab{padding:8px 12px;border-radius:10px;font-size:12px;font-weight:800;background:#2a2a2a;color:#aaa;border:0;white-space:nowrap}
+.otab.on{background:linear-gradient(135deg,#4f46e5,#9333ea);color:#fff}
+.pbox{background:rgba(0,0,0,.3);border-radius:12px;padding:10px;text-align:center}
+.stp{width:46px;height:46px;flex:none;border-radius:14px;background:#2a2a3a;color:#fff;font-size:22px;font-weight:800;border:0}
+.stp:active{transform:scale(.94)}
+details>summary{list-style:none;cursor:pointer}
+details>summary::-webkit-details-marker{display:none}
+/* ---- light theme ---- */
+html.light .stp{background:#e5e7ee;color:#222}
+html.light body{background:#f1f2f6;color:#1a1a1a}
+html.light .glass,html.light .card{background:#fff;border-color:#e2e2e8;color:#1a1a1a;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+html.light .inp{background:#f3f4f8;color:#111;border-color:#d4d4dc}
+html.light #drawer{background:#f1f2f6;color:#111}
+html.light .authbody{background:#fff!important;color:#111}
+html.light #boardBox{background:#fff}
+html.light .num:not([class*="d-"]):not(.last){background:#e3e3ea;color:#444}
+html.light .cell:not(.mk):not(.fr){background:#eceef4;color:#222;border-color:#cfd2dc;box-shadow:none}
+html.light .pc{background:#fff}
+html.light .pbox{background:#f1f2f6}
+html.light .bg-black\/30,html.light .bg-black\/40{background:#eef0f5!important}
+html.light .text-slate-400,html.light .text-slate-500{color:#666!important}
+html.light .text-white{color:#fff}
+html.light .otab{background:#e5e7ee;color:#555}
+html.light .otab.on{color:#fff}
+html.light .tg{background:#cfd3dd}
+html.light .tg.on{background:#93c5fd}
+html.light .tag.t-no{background:#e5e5e5}
+</style>
+</head>
+<body>
+
+<div id="splash" class="fixed inset-0 z-[100] flex flex-col items-center justify-center">
+  <div class="w-32 h-32 rounded-full flex flex-col items-center justify-center" style="background:radial-gradient(circle at 40% 30%,#1e293b,#020617);border:5px solid #fbbf24"><b class="text-white text-2xl">BINGO</b><b class="text-3xl" style="color:#fbbf24">B13</b></div>
+  <h1 class="text-white text-3xl font-extrabold mt-6">BINGO B13</h1>
+  <div class="mt-6 w-9 h-9 rounded-full border-4 border-white/20 border-t-amber-400 animate-spin"></div>
+</div>
+
+<!-- AUTH -->
+<div id="auth" class="fixed inset-0 z-50 flex flex-col grad overflow-y-auto">
+  <div class="pt-14 pb-8 text-center text-white"><div class="text-5xl mb-2">🎱</div><h1 class="text-3xl font-extrabold tracking-wide">B13 BINGO</h1><p class="text-white/70 text-sm mt-1">ተጫወቱ · አሸንፉ</p>
+    <div class="flex justify-center mt-3"><select class="lgsel" onchange="setPref('lang',this.value)"><option value="am">አማርኛ</option><option value="en">English</option><option value="om">Afaan Oromoo</option><option value="ti">ትግርኛ</option></select></div></div>
+  <div class="authbody flex-1 bg-[#161616] rounded-t-[32px] px-5 pt-8 pb-8">
+    <div id="pLogin" class="fade space-y-4 max-w-md mx-auto">
+      <h2 class="text-2xl font-extrabold">እንኳን ደህና መጡ</h2>
+      <p id="offBanner" class="hidden text-center text-red-500 font-extrabold text-lg py-1">አፑ ለጊዜው ዝግ ነው!</p>
+      <p class="text-slate-400 text-sm">በስልክ ቁጥርዎ ይግቡ</p>
+      <input id="lPhone" class="inp" type="tel" inputmode="numeric" maxlength="10" placeholder="09xxxxxxxx">
+      <div class="relative"><input id="lPass" class="inp pr-12" type="password" placeholder="የይለፍ ቃል"><button type="button" onclick="eye('lPass',this)" class="absolute right-3 top-3 text-lg">👁</button></div>
+      <div id="lErr" class="hidden text-red-400 text-xs text-center bg-red-500/10 rounded-lg py-2"></div>
+      <button class="btn b-p" id="btnLogin">ግባ</button>
+      <button onclick="authPanel('f')" class="w-full text-center text-indigo-300 text-sm font-bold py-1">የይለፍ ቃል ረስተዋል?</button>
+      <div class="glass flex justify-between items-center px-4 py-3 text-sm"><span class="text-slate-400">መለያ የለዎትም?</span><button onclick="authPanel('s')" class="px-3 py-1.5 bg-indigo-500/20 text-indigo-300 font-bold rounded-lg">መለያ ክፈት</button></div>
+    </div>
+    <div id="pSign" class="hidden fade space-y-3 max-w-md mx-auto">
+      <button onclick="authPanel('l')" class="text-indigo-300 text-sm">← ተመለስ</button>
+      <h2 class="text-2xl font-extrabold">መለያ ክፈት</h2>
+      <input id="sPhone" class="inp" type="tel" inputmode="numeric" maxlength="10" placeholder="ስልክ (09xxxxxxxx)">
+      <input id="sName" class="inp" placeholder="ሙሉ ስም">
+      <div class="relative"><input id="sPass" class="inp pr-12" type="password" placeholder="የይለፍ ቃል (ቢያንስ 4)"><button type="button" onclick="eye('sPass',this)" class="absolute right-3 top-3 text-lg">👁</button></div>
+      <div class="relative"><input id="sPass2" class="inp pr-12" type="password" placeholder="የይለፍ ቃል ድገም"><button type="button" onclick="eye('sPass2',this)" class="absolute right-3 top-3 text-lg">👁</button></div>
+      <div id="sErr" class="hidden text-red-400 text-xs text-center bg-red-500/10 rounded-lg py-2"></div>
+      <button class="btn b-p" id="btnSignup">መለያ ፍጠር</button>
+    </div>
+    <div id="pForgot" class="hidden fade space-y-3 max-w-md mx-auto">
+      <button onclick="authPanel('l')" class="text-indigo-300 text-sm">← ወደ መግቢያ ተመለስ</button>
+      <h2 class="text-2xl font-extrabold">የይለፍ ቃል ረስተዋል?</h2>
+      <p class="text-slate-400 text-sm">ስልክዎን እና አዲስ የይለፍ ቃል ያስገቡ</p>
+      <input id="fPhone" class="inp" type="tel" inputmode="numeric" maxlength="10" placeholder="ስልክ (09xxxxxxxx)">
+      <div class="relative"><input id="fPass" class="inp pr-12" type="password" placeholder="አዲስ የይለፍ ቃል"><button type="button" onclick="eye('fPass',this)" class="absolute right-3 top-3 text-lg">👁</button></div>
+      <div class="relative"><input id="fPass2" class="inp pr-12" type="password" placeholder="አዲሱን የይለፍ ቃል ድገም"><button type="button" onclick="eye('fPass2',this)" class="absolute right-3 top-3 text-lg">👁</button></div>
+      <div id="fErr" class="hidden text-red-400 text-xs text-center bg-red-500/10 rounded-lg py-2"></div>
+      <button class="btn b-p" id="btnForgot">የይለፍ ቃል ቀይር</button>
+    </div>
+    <div id="pOtp" class="hidden fade space-y-4 max-w-md mx-auto text-center">
+      <button onclick="authPanel('l')" class="text-indigo-300 text-sm block">← ተመለስ</button>
+      <div class="mx-auto w-20 h-20 rounded-full bg-sky-900/40 flex items-center justify-center text-4xl">✉️</div>
+      <h2 class="text-2xl font-extrabold">ስልክዎን ያረጋግጡ</h2>
+      <p class="text-slate-400 text-sm" id="otpSub"></p>
+      <div id="otpBox" class="flex justify-center gap-3">
+        <input class="inp otp" maxlength="1" inputmode="numeric"><input class="inp otp" maxlength="1" inputmode="numeric"><input class="inp otp" maxlength="1" inputmode="numeric"><input class="inp otp" maxlength="1" inputmode="numeric">
+      </div>
+      <div id="otpErr" class="hidden text-red-400 text-xs text-center bg-red-500/10 rounded-lg py-2"></div>
+      <button class="btn b-p" id="btnOtp" disabled style="opacity:.5">አረጋግጥ</button>
+      <p id="otpTimer" class="text-red-400 text-sm font-bold"></p>
+      <button id="btnResend" class="text-slate-400 font-bold" onclick="resendOtp()">ኮድ እንደገና ላክ</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="hidden">
+  <header class="grad px-3 py-3 flex items-center justify-between shadow-lg flex-none">
+    <div class="flex items-center gap-2"><b class="text-white tracking-wide text-lg">🎱 B13</b><span id="hBal" class="text-[11px] font-bold bg-white/20 rounded-full px-2.5 py-1 text-white"></span></div>
+    <div class="flex items-center text-white">
+      <button class="p-2 text-lg" onclick="openM('mSet')">⚙️</button>
+      <button class="p-2 text-lg" onclick="go('bingo')">▦</button>
+      <button class="p-2 text-xl" onclick="openDrawer()">☰</button>
+    </div>
+  </header>
+
+  <div id="topWrap" class="flex-none">
+    <div class="flex justify-end px-2 pb-1"><button id="btnInfoToggle" onclick="setPref('showInfo',!prefs.showInfo)" class="text-red-400 font-bold text-sm">⌃ Show Less</button></div>
+    <div id="ballStrip" class="hidden glass p-3 mb-2">
+      <div class="flex justify-between items-center mb-2"><b class="text-[15px]">የወጡ ቁጥሮች:</b><span class="text-[12px] text-slate-400"><span>የወጡ ኳሶች ብዛት:</span> <span id="stripCnt">0</span></span></div>
+      <div id="stripRow" class="flex items-center gap-2.5 overflow-x-auto pb-1"></div>
+    </div>
+    <div class="exp-only glass p-3 mb-2 text-[13px] space-y-2">
+      <div class="flex gap-2 items-start"><span class="text-blue-400">🎮</span><span class="text-slate-400" data-i="gi_game">ጨዋታ:</span><b id="giType" class="flex-1">መስመር (Line)</b><button onclick="openHints(game?.type)" class="text-amber-400 text-xl">💡</button></div>
+      <div class="info-more flex gap-2 items-start"><span class="text-slate-400">≡</span><span id="giDesc" class="text-[12px] leading-snug" data-i="gi_desc">መረጃ፦ ቴሌብር (0987215758, 0903252550) እና ንግድ ባንክ (1000066910133) ደረሰኝ በሙሉ ወደ አፕሊኬሽኑ በማስገባት ገቢ (deposit) ማድረግ ትችላላችሁ።</span></div>
+      <div class="info-more flex justify-between text-[12px] pt-1 border-t border-white/10">
+        <span>▣ <span data-i="gi_code">ኮድ:</span> <b id="giCode">—</b></span>
+        <span>🕒 <b id="giTime">—</b></span>
+        <span>ⓘ <b id="giStatus">—</b></span>
+      </div>
+      <div class="flex justify-between text-[12px] pt-1 border-t border-white/10">
+        <span class="text-emerald-400">$ <span data-i="gi_price">ዋጋ</span> <b id="giPrice">0</b></span>
+        <span class="text-blue-400">🎮 <span data-i="gi_players">የጨዋታ ብዛት</span> <b id="giPlayers">0</b></span>
+        <span class="text-amber-400">🏆 <span data-i="gi_prize">ሽልማት:</span> <b id="giPrize">0</b></span>
+      </div>
+    </div>
+
+    <div id="boardBox" class="exp-only glass p-2.5 mb-2">
+      <div class="flex justify-center items-center px-1 mb-2">
+        <span class="font-bold text-[15px]"><span data-i="drawn_cnt">የወጡ ኳሶች ብዛት:</span> <span id="tCount">0</span></span>
+        <span id="tBall" class="ball B" style="width:54px;height:54px;font-size:16px;display:none"></span>
+      </div>
+      <div id="board"></div>
+    </div>
+
+    <div class="exp-only glass px-3 py-2 mb-1 flex items-center gap-2 text-[13px]"><span class="text-emerald-400">✔</span><span class="text-slate-400" data-i="l_bingo">ቢንጎ ያሉ ካርቴላ :</span><span id="tBingo" class="flex flex-wrap gap-1">—</span></div>
+    <div class="exp-only glass px-3 py-2 mb-1 flex items-center gap-2 text-[13px]"><span class="text-red-400">⊘</span><span class="text-slate-400" data-i="l_block">የታሰሩ ካርቴላ :</span><span id="tBlock" class="flex flex-wrap gap-1">—</span></div>
+    <div class="exp-only glass px-3 py-2 mb-1 flex items-center gap-2 text-[13px]"><span class="text-amber-400">🏆</span><span class="text-slate-400" data-i="l_win">አሸናፊ ካርቴላ :</span><span id="tWin" class="flex flex-wrap gap-1">—</span></div>
+
+    <p id="claimMsg" class="hidden text-center text-amber-400 font-bold text-[14px] py-1"></p>
+    <p id="nextMsg" class="hidden text-center text-blue-400 font-bold text-[13px] py-1"></p>
+    <p id="finMsg" class="hidden text-center text-red-400 font-bold text-[14px] py-1" data-i="fin_msg">ቢንጎ የማለት ሰዓት ተጠናቋል!</p>
+  </div>
+
+  <main>
+    <div id="pg-bingo">
+      <div id="selBar" class="hidden glass p-2 mb-2 flex items-center justify-between gap-2 text-xs">
+        <span><span data-i="selected">ተመርጠዋል:</span> <b id="selCnt">0</b></span>
+        <div class="flex gap-2">
+          <button class="btn b-ok sm" onclick="regSelected(true)">✓ Register</button>
+          <button class="btn b-gray sm" onclick="regSelected(false)">Unregister</button>
+          <button class="btn b-bad sm" onclick="toggleSelMode()">✕</button>
+        </div>
+      </div>
+      <div id="regBar" class="hidden flex gap-2 mb-2">
+        <button class="btn b-ok sm flex-1" onclick="regAll(true)">✓ ሁሉንም Register</button>
+        <button class="btn b-gray sm flex-1" onclick="regAll(false)">✕ ሁሉንም Unregister</button>
+      </div>
+      <div id="cards" class="grid gap-1.5"></div>
+    </div>
+
+    <div id="pg-wallet" class="hidden space-y-3 max-w-lg mx-auto">
+      <div id="wDep" class="card p-4 space-y-3">
+        <h3 class="font-extrabold" data-i="w_dep">⬇️ ማስገባት (ዲፖዚት)</h3>
+        <div class="bg-emerald-50 border rounded-xl p-3 space-y-2 text-[13px]">
+          <p class="text-emerald-400 font-bold text-[12px]" data-i="w_send_to">💳 ወደ እነዚህ አካውንቶች ይላኩ</p>
+          <div class="flex justify-between"><span class="text-slate-500">Telebirr</span><button onclick="copy('0987215758')" class="font-mono font-bold">0987215758 📋</button></div>
+          <div class="flex justify-between"><span class="text-slate-500">Telebirr</span><button onclick="copy('0903252550')" class="font-mono font-bold">0903252550 📋</button></div>
+          <div class="flex justify-between"><span class="text-slate-500">CBE</span><button onclick="copy('1000066910133')" class="font-mono font-bold">1000066910133 📋</button></div>
+        </div>
+        <select id="dMethod" class="inp"><option>Telebirr</option><option>CBE Birr</option><option>CBE Bank</option></select>
+        <input id="dAmt" type="number" min="50" class="inp" placeholder="መጠን (ብር)" data-ip="ph_amt">
+        <input id="dRef" class="inp font-mono" placeholder="Txn / Ref ቁጥር">
+        <button class="btn b-ok" id="btnDeposit" data-i="w_dep_btn">ዲፖዚት ላክ</button>
+      </div>
+      <div id="wWd" class="card p-4 space-y-3 hidden">
+        <h3 class="font-extrabold" data-i="w_wd">⬆️ ማውጣት (ዊዝድሮው)</h3>
+        <select id="wMethod" class="inp"><option>Telebirr</option><option>CBE Birr</option></select>
+        <input id="wAcc" class="inp" placeholder="ስልክ ቁጥር" data-ip="ph_phone">
+        <input id="wAmt" type="number" min="100" class="inp" placeholder="መጠን (ቢያንስ 100 ብር)" data-ip="ph_amt100">
+        <button class="btn b-gold" id="btnWithdraw" data-i="w_wd_btn">ዊዝድሮው ጠይቅ</button>
+      </div>
+      <div id="wTr" class="card p-4 space-y-3 hidden">
+        <h3 class="font-extrabold" data-i="w_tr">⇄ ብር ላክ (ወደ ሌላ ተጠቃሚ)</h3>
+        <p class="text-[12px] text-slate-400" data-i="w_tr_note">የተቀባዩን ስልክ ቁጥር ያስገቡ። ብሩ ወዲያውኑ ይላካል።</p>
+        <input id="trPhone" class="inp" type="tel" inputmode="numeric" maxlength="10" placeholder="የተቀባይ ስልክ (09xxxxxxxx)" data-ip="ph_tr_phone">
+        <input id="trAmt" type="number" min="10" class="inp" placeholder="መጠን (ቢያንስ 10 ብር)" data-ip="ph_amt10">
+        <button class="btn b-p" id="btnTransfer" data-i="w_tr_btn">ብር ላክ</button>
+      </div>
+      <div class="card p-4"><h3 class="font-bold text-sm mb-2" data-i="w_hist">የግብይት ታሪክ</h3><div id="myTx" class="text-xs space-y-1"></div></div>
+    </div>
+
+    <div id="pg-admin" class="hidden space-y-3">
+      <div id="dbWarn" class="hidden rounded-2xl p-4 space-y-2" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.45)">
+        <b class="text-red-400">⚠ ዳታቤዝ ገና አልተዘመነም</b>
+        <p id="dbWarnList" class="text-[12px] text-slate-400"></p>
+        <p class="text-[12px] leading-relaxed">1) «SQL ቅዳ» ን ይጫኑ · 2) Supabase → SQL Editor ውስጥ paste አድርገው Run ይጫኑ · 3) «እንደገና ፈትሽ» ይጫኑ</p>
+        <div class="grid grid-cols-2 gap-2"><button class="btn b-p sm !w-full" onclick="copySql()">📋 SQL ቅዳ</button><button class="btn b-gray sm !w-full" onclick="dbCheck(true)">🔄 እንደገና ፈትሽ</button></div>
+      </div>
+      <div id="admTabs" class="hidden flex gap-2">
+        <button class="otab on flex-1" data-a="game" onclick="setAdmTab('game')">🎮 ጨዋታ</button>
+        <button class="otab flex-1" data-a="fin" onclick="setAdmTab('fin')">💰 ሒሳብ</button>
+      </div>
+      <div id="admGame" class="space-y-3">
+        <div class="rounded-3xl p-4 text-white" style="background:linear-gradient(135deg,#4f46e5,#9333ea 55%,#db2777);box-shadow:0 14px 34px rgba(124,58,237,.4)">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0"><div class="text-[11px] opacity-80">🎮 ጨዋታ ማዘዣ</div><div id="aBanType" class="text-xl font-extrabold leading-tight truncate">—</div>
+              <span id="aBanStat" class="inline-block mt-2 px-3 py-1 rounded-full bg-white/20 text-[12px] font-bold">—</span></div>
+            <button id="btnAutoBig" onclick="toggleAutoNow()" class="shrink-0 px-4 py-3 rounded-2xl font-extrabold text-sm" style="background:#fff;color:#4f46e5">ራስ-ሰር ጀምር</button>
+          </div>
+          <div class="mt-4"><div class="flex justify-between text-[11px] opacity-90"><span>🔢 ኳሶች</span><b id="aBallTxt">0/75</b></div>
+            <div class="h-2 rounded-full bg-white/20 mt-1 overflow-hidden"><div id="aBallBar" class="h-full rounded-full bg-white" style="width:0%"></div></div></div>
+          <div id="aBalls" class="flex gap-1.5 mt-3 overflow-x-auto"></div>
+        </div>
+
+        <div id="aLive" class="grid grid-cols-2 gap-2"></div>
+        <div id="aNext" class="glass px-3 py-2 text-[12px] font-bold text-center hidden"></div>
+
+        <div class="glass p-4 space-y-3">
+          <div class="flex items-center justify-between"><b>📋 የጨዋታዎች ዝርዝር</b><span id="qCount" class="chip" style="background:#4f46e5"></span></div>
+          <p class="text-[11px] text-slate-400 leading-relaxed">ጨዋታዎችን ያዝዙ — አንዱ ሲያልቅ ቀጣዩ ይጀምራል፤ መጨረሻው ሲያልቅ ከመጀመሪያው ይደግማል። እርስዎ እስኪያቆሙ ድረስ ይቀጥላል።</p>
+          <div id="qList" class="space-y-2"></div>
+          <div class="grid grid-cols-2 gap-2"><button class="btn b-ok sm !w-full" onclick="editQ(-1)">➕ ጨዋታ ጨምር</button><button class="btn b-p sm !w-full" onclick="addQ10()">➕ 10 ጨዋታ ጨምር</button></div>
+          <button class="btn b-gray sm !w-full" onclick="clearQ()">🗑 ሁሉንም አጥፋ</button>
+        </div>
+
+        <div class="glass p-4 space-y-3"><b>⚙️ ጠቅላላ ቅንብር</b>
+          <div class="space-y-1"><label class="text-[12px] font-bold">🎴 ከፍተኛ ካርቴላ (በአንድ ሰው)</label>
+          <div class="flex items-center gap-2"><button class="stp" onclick="stp('cfgMax',-5,1,1000000)">−</button><input id="cfgMax" type="number" min="1" max="1000000" class="inp text-center font-extrabold text-lg" oninput="cfgDirty=true"><button class="stp" onclick="stp('cfgMax',5,1,1000000)">+</button></div><p class="text-[11px] text-slate-400 leading-relaxed">አንድ ተጫዋች በአንድ ጨዋታ መግዛት የሚችለው ከፍተኛ ብዛት።</p></div>
+        </div>
+
+        <details class="glass p-4">
+          <summary class="flex items-center justify-between font-bold"><span>🕹 በእጅ መቆጣጠሪያ</span><span class="text-slate-400 text-xs">ክፈት ▾</span></summary>
+          <div class="mt-3 space-y-3">
+            <p class="text-[11px] text-slate-400">ራስ-ሰር ሲበራ እነዚህን መጠቀም አያስፈልግም — ለድንገተኛ ሁኔታ ብቻ።</p>
+            <div class="grid grid-cols-2 gap-2">
+              <button class="btn b-p sm !w-full" id="btnPrepare">🔔 ዝግጁ</button>
+              <button class="btn b-gold sm !w-full" id="btnStart">🎲 ጀምር</button>
+              <button class="btn b-ok sm !w-full" id="btnDraw">➕ ቁጥር ጥራ</button>
+              <button class="btn b-bad sm !w-full" id="btnReset">♻ ዳግም</button>
+              <button class="btn b-p sm !w-full col-span-2" id="btnNew">🆕 አዲስ ጨዋታ ፍጠር</button>
+            </div>
+            <ul class="text-[11px] text-slate-400 space-y-1 list-disc pl-4 leading-relaxed">
+              <li><b>ዝግጁ</b> — ጨዋታው ሊጀምር መሆኑን ያሳውቃል።</li>
+              <li><b>ጀምር</b> — ጨዋታውን አሁኑኑ ይጀምራል፤ ኳሶች በራሳቸው በተቀመጠው ሰከንድ ይጠራሉ።</li>
+              <li><b>ቁጥር ጥራ</b> — ተጨማሪ አንድ ቁጥር በእጅ ይጠራል።</li>
+              <li><b>ዳግም</b> — ጨዋታውን ያጠፋል፣ የተገዙ ካርቴላዎችን ይሰርዛል (ገንዘብ አይመለስም)።</li>
+            </ul>
+          </div>
+        </details>
+
+        <details class="glass p-4">
+          <summary class="flex items-center justify-between font-bold"><span>💡 ምክሮች</span><span class="text-slate-400 text-xs">ክፈት ▾</span></summary>
+          <div class="mt-3 text-[11px] leading-relaxed space-y-1 text-slate-400">
+            <p>• ቅንብሩን ከቀየሩ በኋላ <b>"አስቀምጥ"</b> መጫን አይርሱ።</p>
+            <p>• የዋጋ እና የ % ለውጥ ከቀጣዩ ጨዋታ ጀምሮ ይሠራል።</p>
+            <p>• ጨዋታ እየተካሄደ ሳለ ተጫዋቾች ለቀጣዩ ጨዋታ ካርቴላ መግዛት ይችላሉ።</p>
+            <p>• ቢንጎ ከተባለ በኋላ ሌሎች ለ30 ሰከንድ ቢንጎ ማለት ይችላሉ፤ ከዚያ ጨዋታው ይዘጋል።</p>
+            <p>• ሐሰተኛ ቢንጎ የጠራ ካርቴላ ይታሰራል (Blocked)።</p>
+            <p>• ራስ-ሰሩ 24 ሰዓት ያለማቋረጥ እንዲሠራ የ pg_cron SQL ያሂዱ፤ ካልሆነ አፑ ቢያንስ በአንድ ሰው ሲከፈት ይሠራል።</p>
+          </div>
+        </details>
+
+        <div class="sticky bottom-3 z-20"><button class="btn b-p" id="btnApplyCfg" style="box-shadow:0 10px 30px rgba(124,58,237,.55)">✓ ቅንብሩን አስቀምጥ</button></div>
+      </div>
+      <div id="admFin" class="space-y-3">
+        <div class="rounded-3xl p-4 text-white" style="background:linear-gradient(135deg,#059669,#0d9488 55%,#2563eb);box-shadow:0 14px 34px rgba(5,150,105,.35)">
+          <div class="text-[11px] opacity-80">💰 ሒሳብ አድሚን</div>
+          <div class="grid grid-cols-3 gap-2 mt-3 text-center">
+            <div class="rounded-2xl bg-white/15 p-2"><div class="text-[10px] opacity-90">በመጠበቅ</div><b id="fPend" class="text-xl">0</b></div>
+            <div class="rounded-2xl bg-white/15 p-2"><div class="text-[10px] opacity-90">ገቢ</div><b id="fIn" class="text-xl">0</b></div>
+            <div class="rounded-2xl bg-white/15 p-2"><div class="text-[10px] opacity-90">ወጪ</div><b id="fOut" class="text-xl">0</b></div>
+          </div>
+        </div>
+        <div class="glass p-3 space-y-3">
+          <div class="flex gap-2">
+            <button class="otab on flex-1" data-f="all" onclick="setFTab('all')">ሁሉም</button>
+            <button class="otab flex-1" data-f="DEPOSIT" onclick="setFTab('DEPOSIT')">⬇ ዲፖዚት</button>
+            <button class="otab flex-1" data-f="WITHDRAW" onclick="setFTab('WITHDRAW')">⬆ ዊዝድሮው</button>
+          </div>
+          <input id="fSearch" class="inp !py-2 !text-sm" placeholder="ፈልግ: ስም / ስልክ / Ref" oninput="renderFinLists()">
+          <div class="text-xs font-bold text-amber-300">⏳ በመጠበቅ ላይ ያሉ ጥያቄዎች</div>
+          <div id="fList" class="space-y-3 max-h-[52vh] overflow-y-auto"></div>
+          <div class="text-xs font-bold text-slate-400 pt-2 border-t border-white/10">✔ የተሰሩ (ሊሽሩ ይችላሉ)</div>
+          <div id="fDone" class="space-y-3 max-h-[40vh] overflow-y-auto"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OWNER -->
+    <div id="pg-owner" class="hidden space-y-3 max-w-2xl mx-auto">
+      <div class="flex gap-2 overflow-x-auto pb-1">
+        <button class="otab on" data-t="fin" onclick="oTab('fin')">💰 ገቢ እና ወጪ</button>
+        <button class="otab" data-t="hist" onclick="oTab('hist')">📜 ታሪክ</button>
+        <button class="otab" data-t="staff" onclick="oTab('staff')">🛡️ አድሚኖች</button>
+        <button class="otab" data-t="users" onclick="oTab('users')">👥 ተጠቃሚዎች</button>
+        <button class="otab" data-t="safe" onclick="oTab('safe')">🔒 ሴፍቲ</button>
+      </div>
+      <div id="ot-fin" class="space-y-3">
+        <div id="oPeriods" class="space-y-3"></div>
+        <div class="glass p-4"><h3 class="font-bold text-sm mb-2">👤 አድሚን በአድሚን (ያጸደቁት)</h3><div id="oByAdmin" class="space-y-1 text-xs"></div></div>
+      </div>
+      <div id="ot-hist" class="hidden glass p-4 space-y-3">
+        <h3 class="font-bold text-sm">📜 ሙሉ የትራንዛክሽን ታሪክ</h3>
+        <div class="grid grid-cols-2 gap-2">
+          <select id="hfType" class="inp !py-2 !text-xs" onchange="renderHist()"><option value="">ሁሉም አይነት</option><option value="DEPOSIT">ዲፖዚት</option><option value="WITHDRAW">ዊዝድሮው</option><option value="TRANSFER_OUT">ዝውውር</option></select>
+          <select id="hfStat" class="inp !py-2 !text-xs" onchange="renderHist()"><option value="">ሁሉም ሁኔታ</option><option value="APPROVED">ተቀብሏል</option><option value="REJECTED">ተሰርዟል</option><option value="PENDING">በመጠበቅ</option></select>
+        </div>
+        <input id="hfQ" class="inp !py-2 !text-xs" placeholder="ፈልግ: ስም / ስልክ / Ref" oninput="renderHist()">
+        <div id="oHist" class="space-y-2 max-h-[65vh] overflow-y-auto"></div>
+      </div>
+      <div id="ot-staff" class="hidden space-y-3">
+        <div class="glass p-4 space-y-3">
+          <h3 class="font-bold text-sm text-indigo-300">➕ አዲስ አድሚን ፍጠር</h3>
+          <select id="aRole" class="inp"><option value="ADMIN_GAME">🎮 ጨዋታ አድሚን</option><option value="ADMIN_FINANCE">💰 ሒሳብ አድሚን</option></select>
+          <input id="aName" class="inp" placeholder="ሙሉ ስም">
+          <input id="aPhone" class="inp" type="tel" inputmode="numeric" maxlength="10" placeholder="ስልክ (09xxxxxxxx)">
+          <div class="relative"><input id="aPass" class="inp pr-12" type="password" placeholder="የይለፍ ቃል (ቢያንስ 4)"><button type="button" onclick="eye('aPass',this)" class="absolute right-3 top-3 text-lg">👁</button></div>
+          <div id="aErr" class="hidden text-red-400 text-xs text-center"></div>
+          <button class="btn b-p" id="btnAddAdmin">አድሚን ፍጠር</button>
+        </div>
+        <div class="glass p-4"><h3 class="font-bold text-sm mb-2">🛡️ ያሉ አድሚኖች</h3><div id="oStaff" class="space-y-2 text-xs"></div></div>
+      </div>
+      <div id="ot-users" class="hidden glass p-4"><h3 class="font-bold text-sm mb-2">👥 ተጠቃሚዎች</h3>
+        <div id="oUsers" class="space-y-1 max-h-[65vh] overflow-y-auto text-xs"></div>
+      </div>
+      <div id="ot-safe" class="hidden glass p-4 flex items-center justify-between gap-3">
+        <div><h3 class="font-bold text-sm text-red-300">🛡️ ሴፍቲ ቁልፍ</h3><p class="text-[11px] text-slate-400">አፑን ያጥፉ — ተጫዋቾች መግባት አይችሉም</p></div>
+        <button id="safeBtn" class="btn sm b-ok">🟢 ON</button>
+      </div>
+    </div>
+  </main>
+
+  <button id="floatBall" onclick="$('topWrap').scrollTo({top:0,behavior:'smooth'})" class="hidden fixed left-3 bottom-5 z-30 px-3 py-2 rounded-2xl bg-black/75 text-white items-center gap-2 shadow-2xl" style="display:flex"></button>
+  <div class="fixed bottom-5 right-4 z-30 flex flex-col items-end gap-2" id="fabWrap">
+    <div id="fabMenu" class="hidden flex-col gap-1.5 items-end max-h-[55vh] overflow-y-auto"></div>
+    <p id="fabHint" class="text-[11px] text-emerald-300 font-bold bg-black/70 px-2 py-0.5 rounded-lg"></p>
+    <button onclick="toggleFab()" class="w-16 h-16 rounded-full text-white text-4xl shadow-2xl bg-[#f44336]">+</button>
+  </div>
+</div>
+
+<!-- DRAWER -->
+<div id="dBg" class="fixed inset-0 z-50 hidden mbg" onclick="closeDrawer()"></div>
+<div id="drawer" class="drawer fixed top-0 right-0 z-[55] h-full w-[88%] max-w-sm bg-[#141414] text-slate-100 overflow-y-auto shadow-2xl">
+  <div class="p-4 space-y-3 text-sm">
+    <div class="card p-4 flex items-center justify-between"><b class="text-lg" data-i="d_profile">👤 ፕሮፋይል</b><button onclick="closeDrawer()" class="text-2xl text-slate-400">×</button></div>
+    <div class="card p-4 space-y-1"><div class="text-slate-400 text-xs" data-i="d_account">አካውንት</div><div><b id="dName"></b></div><div>📞 Phone: <b id="dPhone"></b></div></div>
+    <div class="card p-4"><div class="text-slate-400 text-xs mb-1" data-i="d_balance">ሒሳብ</div><div class="flex justify-between"><span><span data-i="d_total">ጠቅላላ:</span> <b id="dBal" class="text-emerald-400"></b></span></div></div>
+    <div class="card p-4"><div class="font-bold mb-2" data-i="d_depwd">ማስገባት እና ማውጣት</div>
+      <button onclick="openWallet('dep')" class="w-full text-left py-2.5 text-blue-400" data-i="d_dep">⊕ ማስገባት</button>
+      <button onclick="openWallet('wd')" class="w-full text-left py-2.5 text-red-400" data-i="d_wd">⊖ ማውጣት</button>
+      <button onclick="openWallet('tr')" class="w-full text-left py-2.5 text-indigo-400" data-i="d_tr">⇄ ብር ላክ</button></div>
+    <div class="card p-4"><div class="font-bold mb-2" data-i="d_history">🕘 ታሪክ</div>
+      <button onclick="openWallet('hist')" class="w-full text-left py-2.5" data-i="d_txhist">🕘 የግብይት ታሪክ</button></div>
+    <div class="card p-4 space-y-3"><div class="font-bold">🔔 Notifications</div>
+      <div class="flex items-center justify-between gap-2"><span data-i="n_start">ጨዋታ ሲጀምር</span>
+        <select id="sGs" class="inp !w-auto !py-2 !text-xs" onchange="setPref('gs',this.value)">
+          <option value="reg" data-i="n_reg">ካርቴላ ካስመዘገብኩኝ ብቻ</option>
+          <option value="always" data-i="n_always">ሁልጊዜ (ሳላስመዘግብም)</option>
+          <option value="off" data-i="n_off">Off (ኖቲፊኬሽን አልፈልግም)</option>
+        </select></div>
+      <div class="flex items-center justify-between gap-2"><span data-i="n_new">አዲስ ጨዋታ ሲፈጠር አሳውቀኝ</span><button id="tgNotify" class="tg on" onclick="setPref('notify',!prefs.notify)"></button></div></div>
+    <div class="card p-4 space-y-3"><div class="font-bold" data-i="s_title">⚙️ ሴቲንግ</div>
+      <div class="flex items-center justify-between gap-2"><span data-i="s_theme">🌙 ገጽታ</span>
+        <select id="sTheme" class="inp !w-auto !py-2 !text-xs" onchange="setPref('theme',this.value)"><option value="dark" data-i="s_dark">ጨለማ</option><option value="light" data-i="s_light">ብርሃን</option></select></div>
+      <div class="flex items-center justify-between gap-2"><span data-i="s_sound">🔊 ድምጽ</span><button id="tgSound" class="tg on" onclick="setPref('sound',!prefs.sound)"></button></div>
+      <div class="flex items-center justify-between gap-2"><span data-i="s_lang">🌐 ቋንቋ</span>
+        <select id="sLang" class="inp !w-auto !py-2 !text-xs" onchange="setPref('lang',this.value)"><option value="am">አማርኛ</option><option value="en">English</option><option value="om">Afaan Oromoo</option><option value="ti">ትግርኛ</option></select></div></div>
+    <div class="card p-4 space-y-2"><div class="font-bold" data-i="c_title">❓ ያግኙን</div>
+      <div class="text-[13px]"><span data-i="c_phone">📱 እኛን ለማግኘት ስልክ:</span> <button onclick="copy('0987215758')" class="font-bold">0987215758</button> , <button onclick="copy('0903252550')" class="font-bold">0903252550</button></div>
+      <div class="flex justify-between items-center"><span>✈️ Telegram</span><button onclick="window.open(TG_LINK,'_blank')" class="text-blue-400 font-bold">Open</button></div></div>
+    <div class="card p-4 flex items-center justify-between"><span data-i="r_title">📘 የጨዋታ ደንቦችና ሕጎች</span><button onclick="openM('mRules')" class="text-blue-400 font-bold" data-i="r_read">አንብብ</button></div>
+    <button id="dAdm" onclick="closeDrawer();go('admin')" class="hidden w-full py-3 bg-blue-500/20 text-blue-400 font-bold rounded-xl" data-i="d_admin">🛡️ አድሚን ፓነል</button>
+    <button id="dOwn" onclick="closeDrawer();go('owner')" class="hidden w-full py-3 bg-amber-500/20 text-amber-500 font-bold rounded-xl" data-i="d_owner">👑 ኦነር ዳሽቦርድ</button>
+    <div class="text-center pt-1"><button onclick="logout()" class="btn b-bad !w-auto px-10">⎋ Logout</button></div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div id="mSet" class="fixed inset-0 z-[60] hidden items-center justify-center mbg p-4">
+  <div class="card w-full max-w-sm fade overflow-hidden max-h-[92vh] overflow-y-auto">
+    <div class="flex justify-between items-center px-4 py-4"><b class="text-lg" data-i="g_title">⚙️ የጨዋታ ቅንብሮች</b><button onclick="closeM('mSet')" class="text-3xl">×</button></div>
+    <div class="px-4 pb-5 space-y-3 text-sm">
+      <div class="glass p-3"><div class="flex justify-between items-center gap-2"><span data-i="s_lang">🌐 ቋንቋ</span><select class="inp !w-auto !py-2 !text-xs lgsel2" onchange="setPref('lang',this.value)"><option value="am">አማርኛ</option><option value="en">English</option><option value="om">Afaan Oromoo</option><option value="ti">ትግርኛ</option></select></div>
+        <div class="flex justify-between items-center gap-2"><span>↕ የማሸብለያ ዘዴ</span><select id="sScroll" class="inp !w-auto !py-2 !text-xs" onchange="setPref('scrollMode',this.value)"><option value="cards">ካርቴላ ብቻ ይሸብለል</option><option value="all">ከቁጥር ቦርድ ጋር አብሮ</option></select></div></div>
+      <div class="glass p-3 space-y-3">
+        <div class="text-blue-400 font-bold text-xs" data-i="g_actions">ተግባራት</div>
+        <div class="flex justify-between items-center gap-2"><span data-i="g_reset">ምልክት የተደረጉ ቁጥሮችን አጥፋ (Reset)</span><button class="btn b-bad sm" onclick="resetMarks()">Reset</button></div>
+        <div class="flex justify-between items-center gap-2"><span data-i="g_select">ብዙ ካርቴላዎችን ምረጥ (Select)</span><button class="btn b-p sm" onclick="closeM('mSet');toggleSelMode()">Select</button></div>
+      </div>
+      <div class="glass p-3 space-y-3">
+        <div class="text-blue-400 font-bold text-xs" data-i="s_title2">ሴቲንግ</div>
+        <div class="flex justify-between items-center gap-2"><span data-i="g_order">የካርቴላዎች አደራደር</span>
+          <select id="sOrder" class="inp !w-auto !py-2 !text-xs" onchange="setPref('order',this.value)"><option value="desc" data-i="o_desc">ከፍተኛ→ዝቅተኛ</option><option value="asc" data-i="o_asc">ዝቅተኛ→ከፍተኛ</option><option value="reg" data-i="o_reg">የተመዘገቡ መጀመሪያ</option></select></div>
+        <div class="flex justify-between items-center gap-2"><span data-i="g_cols">ወደ ጎን የካርቴላ ብዛት</span>
+          <select id="sCols" class="inp !w-auto !py-2" onchange="setPref('cols',+this.value)"><option>1</option><option>2</option><option>3</option><option>4</option></select></div>
+        <div class="flex justify-between items-center gap-2"><span data-i="g_markall">አንዱ ላይ ባጠቆርከው ሁሉንም አጥቁር</span><button id="tgMarkAll" class="tg on" onclick="setPref('markAll',!prefs.markAll)"></button></div>
+        <div class="flex justify-between items-center gap-2"><span>🤖 ራስ-ሰር ኳስ ማጥቆር<br><small class="text-slate-400">የወጡ ቁጥሮች በካርቴላዎ ላይ በራሳቸው ይጠቆራሉ። ቢንጎ ግን እርስዎ ይጫናሉ።</small></span><button id="tgAutoMark" class="tg" onclick="setPref('autoMark',!prefs.autoMark)"></button></div>
+        <div class="flex justify-between items-center gap-2"><span>🗣 ኳስ በድምፅ መጥራት<br><small class="text-slate-400">ቁጥሩ ሲወጣ ድምፁ ያነብበዋል።</small></span><button id="tgVoice" class="tg" onclick="setPref('voice',!prefs.voice)"></button></div>
+        <div class="flex justify-between items-center gap-2"><span data-i="g_color">ማጥቆርያ ቀለም</span>
+          <select id="sColor" class="inp !w-auto !py-2 !text-xs" onchange="setPref('color',this.value)"><option value="red" data-i="c_red">🔴 ቀይ</option><option value="blue" data-i="c_blue">🔵 ሰማያዊ</option><option value="green" data-i="c_green">🟢 አረንጓዴ</option><option value="orange" data-i="c_orange">🟠 ብርቱካናማ</option><option value="purple" data-i="c_purple">🟣 ወይን ጠጅ</option></select></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="mRules" class="fixed inset-0 z-[70] hidden items-center justify-center mbg p-4">
+  <div class="card w-full max-w-sm fade p-5 max-h-[88vh] overflow-y-auto text-[13px] leading-relaxed space-y-3">
+    <h3 class="font-extrabold text-lg">የጨዋታ ደንቦችና ሕጎች</h3>
+    <b>የአጠቃቀም ደንቦች</b>
+    <ol class="list-decimal pl-5 space-y-1">
+      <li>ካርቴላ ከመግዛት በኋላ ለጨዋታው Register ማድረግ አለብዎት።</li>
+      <li>ቢንጎ ሲሞሉ በትክክል ሳይሞሉ "Bingo" ቢሉ ካርቴላው ይቆለፋል (Blocked)።</li>
+      <li>ብዙ ካርቴላ ቢገዙም እያንዳንዱ ካርቴላ ለብቻው ይወዳደራል።</li>
+      <li>ዲፖዚት በቴሌብር ወይም በባንክ ያድርጉና Ref ቁጥሩን ያስገቡ፤ አድሚኑ ካረጋገጠ በኋላ ሒሳብዎ ይጨምራል።</li>
+      <li>ከግንኙነት (ኔትዎርክ) ችግር ለሚፈጠር ኪሳራ አፑ ኃላፊነት አይወስድም።</li>
+    </ol>
+    <b>የጨዋታ ሕጎች</b>
+    <ol class="list-decimal pl-5 space-y-1">
+      <li>የመጨረሻው የወጣ ቁጥር (Active Number) በሞሉት መስመር ውስጥ ከሌለ ቢንጎው ትክክለኛ አሸናፊ አይሆንም።</li>
+      <li>ቁጥሩ ካልወጣ ማጥቆር አይቻልም።</li>
+      <li>ቢንጎ ከተባለ በኋላ ሌሎች ለ30 ሰከንድ ቢንጎ ማለት ይችላሉ።</li>
+    </ol>
+    <div class="text-right"><button onclick="closeM('mRules')" class="text-indigo-400 font-bold">ዝጋ</button></div>
+  </div>
+</div>
+
+<div id="mWin" class="fixed inset-0 z-[80] hidden items-center justify-center mbg">
+  <div class="glass p-6 max-w-md w-full mx-4 text-center border-2 border-emerald-400/40 fade">
+    <div class="text-5xl">🏆</div>
+    <h2 class="text-2xl font-black text-emerald-400">ቢንጎ!</h2>
+    <p id="wPat" class="text-amber-300 text-sm mb-3"></p>
+    <div class="bg-black/40 rounded-2xl p-4 mb-3 text-left text-sm space-y-1.5">
+      <div class="flex justify-between"><span class="text-slate-400">አሸናፊ</span><b id="wName"></b></div>
+      <div class="flex justify-between"><span class="text-slate-400">ካርድ</span><b id="wCard"></b></div>
+      <div class="flex justify-between border-t border-white/10 pt-2"><span class="text-slate-400">ሽልማት</span><b id="wAmt2" class="text-xl text-emerald-400"></b></div>
+    </div>
+    <button class="btn b-ok" onclick="closeM('mWin')">ገባኝ</button>
+  </div>
+</div>
+
+<div id="mSetup" class="fixed inset-0 z-[95] hidden items-center justify-center mbg p-4">
+  <div class="card w-full max-w-sm fade p-5 space-y-3">
+    <h3 class="font-extrabold text-lg">👑 የባለቤት (Owner) መለያ ይፍጠሩ</h3>
+    <p class="text-xs text-slate-400">የመጀመሪያ ጊዜ ማዋቀር። ይህ መለያ ሁሉንም ይቆጣጠራል።</p>
+    <input id="oName" class="inp" placeholder="ሙሉ ስም">
+    <input id="oPhone" class="inp" type="tel" inputmode="numeric" maxlength="10" placeholder="ስልክ (09xxxxxxxx)">
+    <div class="relative"><input id="oPass" class="inp pr-12" type="password" placeholder="የይለፍ ቃል (ቢያንስ 4)"><button type="button" onclick="eye('oPass',this)" class="absolute right-3 top-3 text-lg">👁</button></div>
+    <div class="relative"><input id="oPass2" class="inp pr-12" type="password" placeholder="የይለፍ ቃል ድገም"><button type="button" onclick="eye('oPass2',this)" class="absolute right-3 top-3 text-lg">👁</button></div>
+    <div id="oErr" class="hidden text-red-400 text-xs text-center"></div>
+    <button class="btn b-p" id="btnSetupOwner">መለያ ፍጠር</button>
+  </div>
+</div>
+
+<div id="mQ" class="fixed inset-0 z-[78] hidden items-center justify-center mbg p-3">
+  <div class="card w-full max-w-sm fade p-4 max-h-[92vh] overflow-y-auto space-y-3">
+    <b class="text-lg">🎮 ጨዋታ አስተካክል</b>
+    <input type="hidden" id="qType" value="line">
+    <div id="qTypeGrid" class="grid grid-cols-4 gap-2 max-h-[32vh] overflow-y-auto pr-1"></div>
+    <p id="qTypeDesc" class="text-[11px] text-slate-400 leading-relaxed"></p>
+    <div class="space-y-1"><label class="text-[12px] font-bold">💵 ዋጋ (ብር)</label>
+          <div class="flex items-center gap-2"><button class="stp" onclick="stp('qPrice',-5,1,100000)">−</button><input id="qPrice" type="number" min="1" max="100000" class="inp text-center font-extrabold text-lg" oninput=""><button class="stp" onclick="stp('qPrice',5,1,100000)">+</button></div></div>
+    <div class="space-y-1"><label class="text-[12px] font-bold">🏆 ለአሸናፊ የሚሰጥ %</label>
+          <div class="flex items-center gap-2"><button class="stp" onclick="stp('qPct',-5,1,100)">−</button><input id="qPct" type="number" min="1" max="100" class="inp text-center font-extrabold text-lg" oninput=""><button class="stp" onclick="stp('qPct',5,1,100)">+</button></div></div>
+    <div class="space-y-1"><label class="text-[12px] font-bold">🔔 የኳስ ጥሪ (ሰከንድ)</label>
+          <div class="flex items-center gap-2"><button class="stp" onclick="stp('qInt',-1,2,60)">−</button><input id="qInt" type="number" min="2" max="60" class="inp text-center font-extrabold text-lg" oninput=""><button class="stp" onclick="stp('qInt',1,2,60)">+</button></div></div>
+    <div class="space-y-1"><label class="text-[12px] font-bold">⏳ ዝግጅት ጊዜ (ደቂቃ)</label>
+          <div class="flex items-center gap-2"><button class="stp" onclick="stp('qWait',-1,1,240)">−</button><input id="qWait" type="number" min="1" max="240" class="inp text-center font-extrabold text-lg" oninput=""><button class="stp" onclick="stp('qWait',1,1,240)">+</button></div><p class="text-[11px] text-slate-400 leading-relaxed">ጨዋታው ከመጀመሩ በፊት ተጫዋቾች ካርቴላ ገዝተው የሚመዘገቡበት ጊዜ።</p></div>
+    <div class="grid grid-cols-3 gap-2 pt-1"><button class="btn b-gray sm !w-full" onclick="closeM('mQ')">ሰርዝ</button><button id="qDelBtn" class="btn b-bad sm !w-full" onclick="delQ(qEdit);closeM('mQ')">አጥፋ</button><button class="btn b-ok sm !w-full" onclick="saveQ()">አስቀምጥ</button></div>
+  </div>
+</div>
+
+<div id="mHints" class="fixed inset-0 z-[75] hidden items-center justify-center mbg p-4">
+  <div class="card w-full max-w-md fade max-h-[92vh] overflow-y-auto" style="border-radius:28px;padding:26px 22px">
+    <div class="flex items-center gap-3 mb-4"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#7c4dff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg><b class="text-xl">የጨዋታ ሂንቶች</b></div>
+    <div id="hintBody"></div>
+    <div class="text-right mt-6"><button onclick="closeM('mHints')" class="font-extrabold text-lg" style="color:#7c4dff">ዝጋ</button></div>
+  </div>
+</div>
+
+<div id="mDel" class="fixed inset-0 z-[78] hidden items-center justify-center mbg p-4">
+  <div class="card w-full max-w-sm fade p-6 text-center space-y-3">
+    <div class="mx-auto w-16 h-16 rounded-full bg-red-500/20 text-3xl flex items-center justify-center">🗑</div>
+    <h3 class="font-extrabold text-lg">ካርቴላ አጥፋ</h3>
+    <p class="text-sm">ይህን ካርቴላ ለማጥፋት እርግጠኛ ነህ? ክፍያው ወደ ሒሳብህ ይመለሳል።</p>
+    <div class="grid grid-cols-2 gap-3 pt-1"><button class="btn b-gray" onclick="closeM('mDel')">አይ</button><button class="btn b-bad" onclick="doDel()">አዎ</button></div>
+  </div>
+</div>
+
+<div id="mCard" class="fixed inset-0 z-[78] hidden items-center justify-center mbg p-4">
+  <div class="card w-full max-w-sm fade overflow-hidden">
+    <div id="mCardBody"></div>
+    <div class="text-center py-3"><button class="btn b-bad sm" onclick="closeM('mCard')">ዝጋ</button></div>
+  </div>
+</div>
+
+<div id="toast" class="fixed bottom-24 left-1/2 -translate-x-1/2 z-[100] hidden px-4 py-2.5 rounded-xl text-sm font-bold shadow-2xl text-white max-w-[90%] text-center"></div>
+
+<script>
+// ===================== SUPABASE =====================
+const SUPA_URL = 'https://qtblapsrlbngbcpccwvj.supabase.co';
+const SUPA_KEY = 'sb_publishable_KCnZZgxrW4yCFo5CG-vDRg_fRxeOQyD';
+const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+const TG_LINK = 'https://t.me/'; // <- የቴሌግራም ሊንክዎን እዚህ ያስገቡ
+
+// ===================== STATE =====================
+let cur = null, settings = null, game = null, myCards = [], gameCards = [];
+let page = 'bingo', fabOpen = false, tick = null, _buying = false;
+let selMode = false, selected = new Set();
+let allTx = [], userMap = {}, oTabNow = 'fin', fTab = 'all';
+let lastStripKey = '', lastCardsSig = '', lastBoardKey = '', boardVisible = true;
+let autoUI = false, cfgDirty = false, delId = null, autoOK = true, cdTimer = null, tickN = 0, tickBusy = false, syncing = false, syncAgain = false;
+
+// ===================== PREFS / THEME / LANG =====================
+const PREF_DEF = { scrollMode:'cards', voice:false, autoMark:false, showInfo:true, sound:true, notify:true, gs:'reg', markAll:true, color:'red', order:'desc', cols:2, theme:'dark', lang:'am' };
+let prefs = { ...PREF_DEF };
+try { prefs = { ...PREF_DEF, ...JSON.parse(localStorage.getItem('b13_prefs') || '{}') }; } catch (e) {}
+const COLORS = {
+  red:'linear-gradient(145deg,#f87171,#dc2626)', blue:'linear-gradient(145deg,#60a5fa,#2563eb)',
+  green:'linear-gradient(145deg,#4ade80,#16a34a)', orange:'linear-gradient(145deg,#fdba74,#ea580c)',
+  purple:'linear-gradient(145deg,#c084fc,#7c3aed)'
+};
+// ---- i18n: Amharic (source) + English, Afaan Oromoo, ትግርኛ ----
+const I18N = {
+// ---- auth / main ----
+"ተጫወቱ · አሸንፉ":["Play · Win","Taphadhaa · Injifadhaa","ተጻወቱ · ተዓወቱ"],
+"እንኳን ደህና መጡ":["Welcome","Baga nagaan dhuftan","እንኳዕ ብደሓን መጻእኩም"],
+"አፑ ለጊዜው ዝግ ነው":["The app is temporarily closed","Appiin yeroo ammaaf cufameera","እቲ ኣፕ ንግዜኡ ዕጹው እዩ"],
+"በስልክ ቁጥርዎ ይግቡ":["Log in with your phone number","Lakkoofsa bilbila keessaniin seenaa","ብቁጽሪ ተሌፎንኩም እተዉ"],
+"ግባ":["Log in","Seeni","እተው"],
+"መለያ የለዎትም?":["Don't have an account?","Herrega hin qabduu?","ኣካውንት የብልኩምን?"],
+"መለያ ክፈት":["Create account","Herrega banaa","ኣካውንት ክፈት"],
+"ተመለስ":["Back","Deebi'i","ተመለስ"],
+"መለያ ፍጠር":["Create account","Herrega uumi","ኣካውንት ፍጠር"],
+"የይለፍ ቃል":["Password","Jecha iggitaa","መሕለፊ ቃል"],
+"ስልክ (09xxxxxxxx)":["Phone (09xxxxxxxx)","Bilbila (09xxxxxxxx)","ተሌፎን (09xxxxxxxx)"],
+"ሙሉ ስም":["Full name","Maqaa guutuu","ምሉእ ስም"],
+"የይለፍ ቃል (ቢያንስ 4)":["Password (min. 4)","Jecha iggitaa (xiqqaatti 4)","መሕለፊ ቃል (ብውሑዱ 4)"],
+"የይለፍ ቃል ድገም":["Repeat password","Jecha iggitaa irra deebi'i","መሕለፊ ቃል ደጊምካ ጽሓፍ"],
+"ስልክ ቁጥር":["Phone number","Lakkoofsa bilbilaa","ቁጽሪ ተሌፎን"],
+"መጠን (ብር)":["Amount (Birr)","Hamma (Birrii)","መጠን (ብር)"],
+"Txn / Ref ቁጥር":["Txn / Ref number","Lakkoofsa Txn / Ref","Txn / Ref ቁጽሪ"],
+"መጠን (ቢያንስ 100 ብር)":["Amount (min. 100 Birr)","Hamma (xiqqaatti Birrii 100)","መጠን (ብውሑዱ 100 ብር)"],
+"የተቀባይ ስልክ (09xxxxxxxx)":["Receiver phone (09xxxxxxxx)","Bilbila fudhataa (09xxxxxxxx)","ተሌፎን ተቐባሊ (09xxxxxxxx)"],
+"መጠን (ቢያንስ 10 ብር)":["Amount (min. 10 Birr)","Hamma (xiqqaatti Birrii 10)","መጠን (ብውሑዱ 10 ብር)"],
+"ፈልግ: ስም / ስልክ / Ref":["Search: name / phone / Ref","Barbaadi: maqaa / bilbila / Ref","ድለ: ስም / ተሌፎን / Ref"],
+// ---- game info ----
+"ጨዋታ":["Game","Taphaa","ጸወታ"],
+"መስመር (Line)":["Line","Sarara (Line)","መስመር (Line)"],
+"መረጃ፦ ቴሌብር (0987215758, 0903252550) እና ንግድ ባንክ (1000066910133) ደረሰኝ በሙሉ ወደ አፕሊኬሽኑ በማስገባት ገቢ (deposit) ማድረግ ትችላላችሁ።":["Info: You can deposit by sending to Telebirr (0987215758, 0903252550) or CBE (1000066910133) and entering the receipt in the app.","Odeeffannoo: Telebirr (0987215758, 0903252550) fi Baankii Daldalaa (1000066910133) tiin erguun ragaa (receipt) appii keessatti galchuun galchii (deposit) gochuu dandeessu.","ሓበሬታ: ብቴሌብር (0987215758, 0903252550) ከምኡውን ብንግዲ ባንክ (1000066910133) ልኢኽኩም ደረሰኝ ኣብ ኣፕሊኬሽን ብምእታው ዲፖዚት ክትገብሩ ትኽእሉ።"],
+"ኮድ":["Code","Koodii","ኮድ"],
+"ዋጋ":["Price","Gatii","ዋጋ"],
+"የጨዋታ ብዛት":["Players","Baay'ina taphataa","ብዝሒ ተጻወቲ"],
+"ሽልማት":["Prize","Badhaasa","ሽልማት"],
+"የወጡ ኳሶች ብዛት":["Balls drawn","Baay'ina kubbaa ba'e","ብዝሒ ዝወጹ ኳሶታት"],
+"ቢንጎ ያሉ ካርቴላ":["Bingo cards","Kaartelaa bingoo jedhan","ቢንጎ ዝበሉ ካርተላታት"],
+"የታሰሩ ካርቴላ":["Blocked cards","Kaartelaa hidhaman","ዝተኣሰሩ ካርተላታት"],
+"አሸናፊ ካርቴላ":["Winner cards","Kaartelaa mo'atan","ዓዋቲ ካርተላታት"],
+"ቢንጎ የማለት ሰዓት ተጠናቋል":["Time to call Bingo is over","Yeroon bingoo jechuu xumurameera","ግዜ ቢንጎ ምባል ተወዲኡ"],
+"ተመርጠዋል":["Selected","Filatameera","ተመሪጾም"],
+"ሁሉንም Register":["Register all","Hunda galmeessi","ኩሉ Register"],
+"ሁሉንም Unregister":["Unregister all","Hunda galmee irraa balleessi","ኩሉ Unregister"],
+// ---- wallet ----
+"ማስገባት (ዲፖዚት)":["Deposit","Galchuu (Deposit)","ምእታው (ዲፖዚት)"],
+"ወደ እነዚህ አካውንቶች ይላኩ":["Send to these accounts","Herregoota kanatti ergaa","ናብዚ ኣካውንታት ለኣኹ"],
+"ዲፖዚት ላክ":["Send deposit","Galchii ergi","ዲፖዚት ለኣኽ"],
+"ማውጣት (ዊዝድሮው)":["Withdraw","Baasuu (Withdraw)","ምውጻእ (ዊዝድሮው)"],
+"ዊዝድሮው ጠይቅ":["Request withdrawal","Baasii gaafadhu","ዊዝድሮው ሕተት"],
+"ብር ላክ (ወደ ሌላ ተጠቃሚ)":["Send money (to another user)","Maallaqa ergi (fayyadamaa biraatti)","ብር ለኣኽ (ናብ ካልእ ተጠቃሚ)"],
+"የተቀባዩን ስልክ ቁጥር ያስገቡ። ብሩ ወዲያውኑ ይላካል።":["Enter the receiver's phone number. The money is sent instantly.","Lakkoofsa bilbila fudhataa galchaa. Maallaqni battaluma ergama.","ቁጽሪ ተሌፎን ተቐባሊ ኣእትዉ። እቲ ብር ብቕልጡፍ ይለኣኽ።"],
+"ብር ላክ":["Send money","Maallaqa ergi","ብር ለኣኽ"],
+"የግብይት ታሪክ":["Transaction history","Seenaa daldalaa","ታሪኽ ግብይት"],
+// ---- game admin ----
+"ጨዋታ ማዘዣ":["Game control","Too'annoo taphaa","ማእከል ጸወታ"],
+"ራስ-ሰር ጨዋታ":["Auto game","Taphaa ofumaa","ባዕላዊ ጸወታ"],
+"ሲበራ ሲስተሙ እርስዎ ሳይኖሩ ጨዋታዎችን ደጋግሞ ያጫውታል፦ ይጀምራል → ኳስ ይጠራል → ቢንጎ ሲባል ይዘጋል → ሽልማት ለአሸናፊ ይጨምራል → ቀጣይ ጨዋታ ይፈጥራል። እርስዎ ቅንብሩን እስኪቀይሩ ድረስ ይቀጥላል።":["When ON, the system keeps running games for you even when you're away: it starts → calls balls → closes when Bingo is called → adds the prize to the winner → creates the next game. It continues until you change the settings.","Yeroo ifu, sirni kun isin malee taphoota irra deddeebi'ee geggeessa: ni jalqaba → kubbaa waama → bingoon yeroo jedhamu ni cufa → badhaasa mo'ataaf dabala → taphaa itti aanu uuma. Hanga isin qindaa'ina jijjiirtanitti itti fufa.","ምስ ዝኽፈት ሲስተም ንስኹም ከይሃለኹም ጸወታታት ደጋጊሙ የጻዉት፦ ይጅምር → ኳስ ይጽውዕ → ቢንጎ ምስ ተባህለ ይዕጾ → ሽልማት ንዓዋቲ ይውስኽ → ዝቕጽል ጸወታ ይፈጥር። ንስኹም ቅጥዓት ክሳብ እትቕይሩ ይቕጽል።"],
+"የጨዋታ ዓይነት":["Game type","Gosa taphaa","ዓይነት ጸወታ"],
+"ሂንት":["Hint","Ibsa","ሒንት"],
+"ዋጋ እና ሽልማት":["Price & prize","Gatii fi badhaasa","ዋጋን ሽልማትን"],
+"የካርቴላ ዋጋ (ብር)":["Card price (Birr)","Gatii kaartelaa (Birrii)","ዋጋ ካርተላ (ብር)"],
+"አንድ ካርቴላ የሚሸጥበት ዋጋ። ለምሳሌ 30።":["The price of one card. E.g. 30.","Gatii kaartelaa tokkoo. Fkn 30.","ዋጋ ሓንቲ ካርተላ። ንኣብነት 30።"],
+"ለአሸናፊ የሚሰጥ %":["Winner's share %","Dhibbeentaa mo'ataaf kennamu %","ንዓዋቲ ዝወሃብ %"],
+"ከተመዘገቡ ካርቴላዎች ጠቅላላ ገንዘብ ለአሸናፊ የሚሰጥ መቶኛ (70 ወይም 80)። ቀሪው የቤት ትርፍ ነው። አሸናፊዎች ከአንድ በላይ ከሆኑ ሽልማቱ እኩል ይካፈላል።":["The percentage of the total money from registered cards given to the winner (70 or 80). The rest is the house profit. If there is more than one winner, the prize is split equally.","Dhibbeentaan maallaqa waliigalaa kaartelaa galmaa'aniirraa mo'ataaf kennamu (70 ykn 80). Kan hafu bu'aa mana taphaati. Mo'attoonni tokko ol yoo ta'an badhaasni walqixa qoodama.","ካብ ጠቕላላ ገንዘብ ዝተመዝገቡ ካርተላታት ንዓዋቲ ዝወሃብ መቶኛ (70 ወይ 80)። እቲ ዝተረፈ ትርፊ ቤት እዩ። ዓዋትቲ ካብ ሓደ እንተበዝሑ ሽልማት ማዕረ ይካፈል።"],
+"ጊዜ እና ገደብ":["Time & limits","Yeroo fi daangaa","ግዜን ገደብን"],
+"የኳስ ጥሪ (ሰከንድ)":["Ball call (seconds)","Waamicha kubbaa (sekondii)","ጻውዒት ኳስ (ካልኣይ)"],
+"በየስንት ሰከንድ አንድ ቁጥር እንደሚጠራ። መደበኛው 10 ሰከንድ (ከ2 እስከ 60)።":["How many seconds between each called number. Default is 10 seconds (2 to 60).","Sekondii meeqaan lakkoofsi tokko akka waamamu. Idilee sekondii 10 (2 hanga 60).","ኣብ ነፍሲ ወከፍ ክንደይ ካልኣይ ሓደ ቁጽሪ ከም ዝጽዋዕ። ልሙድ 10 ካልኣይ (ካብ 2 ክሳብ 60)።"],
+"በጨዋታዎች መካከል (ደቂቃ)":["Between games (minutes)","Taphaalee gidduu (daqiiqaa)","ኣብ ማእከል ጸወታታት (ደቒቕ)"],
+"ጨዋታ ከተፈጠረ በኋላ ከስንት ደቂቃ በኋላ እንደሚጀምር (ለምሳሌ 10)። ማንም ካልተመዘገበ ጨዋታው አይጀምርም፣ እንደገና ይጠብቃል።":["How many minutes after a game is created it starts (e.g. 10). If nobody is registered the game won't start and waits again.","Taphni erga uumamee booda daqiiqaa meeqan booda akka jalqabu (fkn 10). Namni tokkollee yoo hin galmoofne taphni hin jalqabu, ammas eegaa.","ጸወታ ድሕሪ ምፍጣሩ ድሕሪ ክንደይ ደቒቕ ከም ዝጅምር (ንኣብነት 10)። ሓደ እኳ እንተዘይተመዝጊቡ ጸወታ ኣይጅምርን፣ ከም ብሓድሽ ይጽበ።"],
+"ከፍተኛ ካርቴላ (በአንድ ሰው)":["Max cards (per person)","Kaartelaa olaanaa (nama tokkoof)","ዝለዓለ ካርተላ (ንሓደ ሰብ)"],
+"አንድ ተጫዋች በአንድ ጨዋታ መግዛት የሚችለው ከፍተኛ ብዛት።":["The maximum number of cards one player can buy in one game.","Baay'ina kaartelaa olaanaa taphataan tokko taphaa tokkoof bitachuu danda'u.","ሓደ ተጻዋቲ ኣብ ሓደ ጸወታ ክገዝእ ዝኽእል ዝለዓለ ብዝሒ።"],
+"በእጅ መቆጣጠሪያ":["Manual controls","Too'annoo harkaa","ብኢድ መቆጻጸሪ"],
+"ክፈት":["Open","Bani","ክፈት"],
+"ራስ-ሰር ሲበራ እነዚህን መጠቀም አያስፈልግም — ለድንገተኛ ሁኔታ ብቻ።":["When Auto is ON you don't need these — for emergencies only.","Yeroo ofumaan ifu kana fayyadamuun hin barbaachisu — yeroo muddamaaf qofa.","ባዕላዊ ምስ ዝኽፈት እዚኦም ምጥቃም ኣየድልን — ንህጹጽ ኩነታት ጥራይ።"],
+"ዝግጁ":["Ready","Qophii","ድሉው"],
+"ጀምር":["Start","Jalqabi","ጀምር"],
+"ቁጥር ጥራ":["Call number","Lakkoofsa waami","ቁጽሪ ጸው"],
+"ዳግም":["Reset","Haaromsi","ዳግማይ"],
+"ጨዋታው ሊጀምር መሆኑን ያሳውቃል።":["Tells players the game is about to start.","Taphni jalqabuuf akka jiru ni beeksisa.","ጸወታ ክጅምር ምዃኑ የፍልጥ።"],
+"ጨዋታውን አሁኑኑ ይጀምራል፤ ኳሶች በራሳቸው በተቀመጠው ሰከንድ ይጠራሉ።":["Starts the game right now; balls are called automatically at the set seconds.","Taphicha amma jalqaba; kubbaawwan sekondii kaa'ameen ofumaan waamamu.","ጸወታ ሕጂ ይጅምር፤ ኳሶታት ብዝተቐመጠ ካልኣይ ባዕሎም ይጽውዑ።"],
+"ተጨማሪ አንድ ቁጥር በእጅ ይጠራል።":["Calls one extra number manually.","Lakkoofsa dabalataa tokko harkaan waama.","ተወሳኺ ሓደ ቁጽሪ ብኢድ ይጽውዕ።"],
+"ጨዋታውን ያጠፋል፣ የተገዙ ካርቴላዎችን ይሰርዛል (ገንዘብ አይመለስም)።":["Ends the game and deletes the bought cards (money is not refunded).","Taphicha balleessa, kaartelaa bitaman haqa (maallaqni hin deebi'u).","ንጸወታ የጠፍእ፣ ዝተገዝኡ ካርተላታት ይስርዝ (ገንዘብ ኣይምለስን)።"],
+"ምክሮች":["Tips","Gorsa","ምኽርታት"],
+"ቅንብሩን ከቀየሩ በኋላ":["After changing the settings","Qindaa'ina erga jijjiirtanii booda","ቅጥዓት ድሕሪ ምቕያር"],
+"አስቀምጥ":["Save","Olkaa'i","ኣቐምጥ"],
+"መጫን አይርሱ።":["don't forget to press it.","tuquu hin irraanfatinaa.","ምጥዓቕ ኣይትርስዑ።"],
+"የዋጋ እና የ % ለውጥ ከቀጣዩ ጨዋታ ጀምሮ ይሠራል።":["Price and % changes apply from the next game.","Jijjiirraan gatii fi % taphaa itti aanurraa eegalee hojjeta.","ለውጢ ዋጋን %ን ካብ ዝቕጽል ጸወታ ይጅምር።"],
+"ጨዋታ እየተካሄደ ሳለ ተጫዋቾች ለቀጣዩ ጨዋታ ካርቴላ መግዛት ይችላሉ።":["While a game is running, players can buy cards for the next game.","Yeroo taphni adeemsifamu taphattoonni taphaa itti aanuuf kaartelaa bitachuu danda'u.","ጸወታ ክካየድ ከሎ ተጻወቲ ንዝቕጽል ጸወታ ካርተላ ክገዝኡ ይኽእሉ።"],
+"ቢንጎ ከተባለ በኋላ ሌሎች ለ30 ሰከንድ ቢንጎ ማለት ይችላሉ፤ ከዚያ ጨዋታው ይዘጋል።":["After Bingo is called, others can call Bingo for 30 seconds; then the game closes.","Bingoon erga jedhamee booda warri kaan sekondii 30f bingoo jechuu danda'u; achiin booda taphni cufama.","ቢንጎ ድሕሪ ዝባሃል ካልኦት ን30 ካልኣይ ቢንጎ ክብሉ ይኽእሉ፤ ድሕሪኡ ጸወታ ይዕጾ።"],
+"ሐሰተኛ ቢንጎ የጠራ ካርቴላ ይታሰራል (Blocked)።":["A card that calls a false Bingo gets blocked (Blocked).","Kaartelaan bingoo sobaa waamte ni hidhama (Blocked).","ሓሶት ቢንጎ ዝጸውዐት ካርተላ ትእሰር (Blocked)።"],
+"ራስ-ሰሩ 24 ሰዓት ያለማቋረጥ እንዲሠራ የ pg_cron SQL ያሂዱ፤ ካልሆነ አፑ ቢያንስ በአንድ ሰው ሲከፈት ይሠራል።":["For Auto to run 24 hours non-stop, run the pg_cron SQL; otherwise it only runs while at least one person has the app open.","Sirni ofumaa sa'aatii 24 addaan malee akka hojjetuuf pg_cron SQL hojjechiisaa; yoo kanaan hin ta'iin yoo xiqqaate nama tokkoon appiin banamee jiru qofa hojjeta.","ባዕላዊ 24 ሰዓት ብዘይ ዕረፍቲ ክሰርሕ pg_cron SQL ኣካይዱ፤ እንተዘይኮነ ኣፕ ብውሑዱ ብሓደ ሰብ ክኽፈት ከሎ ጥራይ ይሰርሕ።"],
+"ቅንብሩን አስቀምጥ":["Save settings","Qindaa'ina olkaa'i","ቅጥዓት ኣቐምጥ"],
+// ---- finance admin / owner ----
+"ሒሳብ አድሚን":["Finance admin","Admiinii herregaa","ኣድሚን ሒሳብ"],
+"በመጠበቅ":["Pending","Eegaa jira","ኣብ ምጽባይ"],
+"ገቢ":["Income","Galii","እቶት"],
+"ወጪ":["Expense","Baasii","ወጻኢ"],
+"ሁሉም":["All","Hunda","ኩሉ"],
+"ዲፖዚት":["Deposit","Galchii","ዲፖዚት"],
+"ዊዝድሮው":["Withdraw","Baasii","ዊዝድሮው"],
+"በመጠበቅ ላይ ያሉ ጥያቄዎች":["Pending requests","Gaaffiiwwan eegaa jiran","ኣብ ምጽባይ ዘለዉ ሕቶታት"],
+"የተሰሩ (ሊሽሩ ይችላሉ)":["Processed (can be undone)","Kan raawwataman (haquun ni danda'ama)","ዝተገብሩ (ክምለሱ ይኽእሉ)"],
+"ገቢ እና ወጪ":["Income & expense","Galii fi baasii","እቶትን ወጻእን"],
+"ታሪክ":["History","Seenaa","ታሪኽ"],
+"አድሚኖች":["Admins","Admiinota","ኣድሚናት"],
+"ተጠቃሚዎች":["Users","Fayyadamtoota","ተጠቀምቲ"],
+"ሴፍቲ":["Safety","Nageenya","ሴፍቲ"],
+"አድሚን በአድሚን (ያጸደቁት)":["Admin by admin (approved)","Admiinii tokko tokkoon (kan mirkaneessan)","ኣድሚን ብኣድሚን (ዘጽደቕዎ)"],
+"ሙሉ የትራንዛክሽን ታሪክ":["Full transaction history","Seenaa daldala guutuu","ምሉእ ታሪኽ ትራንዛክሽን"],
+"ሁሉም አይነት":["All types","Gosa hunda","ኩሉ ዓይነት"],
+"ዝውውር":["Transfer","Dabarsa","ምሕላፍ"],
+"ሁሉም ሁኔታ":["All statuses","Haala hunda","ኩሉ ኩነታት"],
+"ተቀብሏል":["Accepted","Fudhatameera","ተቐቢሉ"],
+"ተሰርዟል":["Rejected","Haqameera","ተሰሪዙ"],
+"አዲስ አድሚን ፍጠር":["Create new admin","Admiinii haaraa uumi","ሓድሽ ኣድሚን ፍጠር"],
+"ጨዋታ አድሚን":["Game admin","Admiinii taphaa","ኣድሚን ጸወታ"],
+"አድሚን ፍጠር":["Create admin","Admiinii uumi","ኣድሚን ፍጠር"],
+"ያሉ አድሚኖች":["Existing admins","Admiinota jiran","ዘለዉ ኣድሚናት"],
+"ሴፍቲ ቁልፍ":["Safety switch","Cufaa nageenyaa","ሴፍቲ መቁልፊ"],
+"አፑን ያጥፉ — ተጫዋቾች መግባት አይችሉም":["Turn the app off — players cannot log in","Appii cufaa — taphattoonni seenuu hin danda'an","ኣፕ ዕጾ — ተጻወቲ ክኣትዉ ኣይክእሉን"],
+// ---- drawer ----
+"ፕሮፋይል":["Profile","Piroofaayilii","ፕሮፋይል"],
+"አካውንት":["Account","Herrega","ኣካውንት"],
+"ሒሳብ":["Balance","Herrega","ሒሳብ"],
+"ጠቅላላ":["Total","Waliigala","ጠቕላላ"],
+"ማስገባት እና ማውጣት":["Deposit & withdraw","Galchuu fi baasuu","ምእታውን ምውጻእን"],
+"ማስገባት":["Deposit","Galchuu","ምእታው"],
+"ማውጣት":["Withdraw","Baasuu","ምውጻእ"],
+"የጨዋታ ደንቦችና ሕጎች":["Game rules","Seera taphaa","ደንብን ሕግን ጸወታ"],
+"ጨዋታ ሲጀምር":["When the game starts","Yeroo taphni jalqabu","ጸወታ ክጅምር ከሎ"],
+"ካርቴላ ካስመዘገብኩኝ ብቻ":["Only if I registered a card","Yoo kaartelaa galmeessise qofa","ካርተላ እንተ ኣመዝጊበ ጥራይ"],
+"ሁልጊዜ (ሳላስመዘግብም)":["Always (even if not registered)","Yeroo hundaa (galmeessuu dhiisee illee)","ሁልጊዜ (እንተዘይኣመዝጊበ እውን)"],
+"Off (ኖቲፊኬሽን አልፈልግም)":["Off (no notifications)","Cufaa (beeksisa hin barbaadu)","Off (ኖቲፊኬሽን ኣይደልን)"],
+"አዲስ ጨዋታ ሲፈጠር አሳውቀኝ":["Notify me when a new game is created","Taphni haaraan yeroo uumamu na beeksisi","ሓድሽ ጸወታ ምስ ዝፍጠር ኣፍልጡኒ"],
+"ሴቲንግ":["Settings","Qindaa'ina","ቅጥዓት"],
+"ገጽታ":["Theme","Bifa","ገጽታ"],
+"ጨለማ":["Dark","Dukkana","ጸልማት"],
+"ብርሃን":["Light","Ifa","ብርሃን"],
+"ድምጽ":["Sound","Sagalee","ድምጺ"],
+"ቋንቋ":["Language","Afaan","ቋንቋ"],
+"ያግኙን":["Contact us","Nu qunnamaa","ርኸቡና"],
+"እኛን ለማግኘት ስልክ":["Call us","Nu bilbilaa","ንምርካብና ተሌፎን"],
+"አንብብ":["Read","Dubbisi","ኣንብብ"],
+"አድሚን ፓነል":["Admin panel","Paanela admiinii","ፓነል ኣድሚን"],
+"ኦነር ዳሽቦርድ":["Owner dashboard","Daashiboordii abbaa qabeenyaa","ዳሽቦርድ ኦነር"],
+// ---- game settings modal ----
+"የጨዋታ ቅንብሮች":["Game settings","Qindaa'ina taphaa","ቅጥዓት ጸወታ"],
+"ተግባራት":["Actions","Hojiiwwan","ተግባራት"],
+"ምልክት የተደረጉ ቁጥሮችን አጥፋ (Reset)":["Clear all marked numbers (Reset)","Lakkoofsota mallattoo godhaman hunda haqi (Reset)","ምልክት ዝተገብረሎም ቁጽርታት ደምስስ (Reset)"],
+"ብዙ ካርቴላዎችን ምረጥ (Select)":["Select multiple cards (Select)","Kaartelaa baay'ee filadhu (Select)","ብዙሓት ካርተላታት ምረጽ (Select)"],
+"የካርቴላዎች አደራደር":["Card order","Tartiiba kaartelaa","ስርዓት ካርተላታት"],
+"ከፍተኛ→ዝቅተኛ":["High → Low","Ol → Gad","ልዕሊ → ታሕቲ"],
+"ዝቅተኛ→ከፍተኛ":["Low → High","Gad → Ol","ታሕቲ → ልዕሊ"],
+"የተመዘገቡ መጀመሪያ":["Registered first","Kan galmaa'e duraan","ዝተመዝገቡ ቀዳማይ"],
+"ወደ ጎን የካርቴላ ብዛት":["Cards per row","Baay'ina kaartelaa tarree tokkoo","ብዝሒ ካርተላ ኣብ ሓደ ተርታ"],
+"አንዱ ላይ ባጠቆርከው ሁሉንም አጥቁር":["Mark on all cards at once","Tokko irratti yoo mallattoo godhe hunda irratti godhi","ኣብ ሓደ እንተ ኣመልኪትካ ኣብ ኩሉ ኣመልክት"],
+"ራስ-ሰር ኳስ ማጥቆር":["Auto-mark balls","Kubbaa ofumaan mallattoo godhi","ባዕላዊ ምልክት ኳስ"],
+"የወጡ ቁጥሮች በካርቴላዎ ላይ በራሳቸው ይጠቆራሉ። ቢንጎ ግን እርስዎ ይጫናሉ።":["Called numbers get marked on your cards automatically. You still press Bingo yourself.","Lakkoofsonni ba'an kaartelaa keessan irratti ofumaan mallattoo godhamu. Bingoo garuu ofii keessan tuqxu.","ዝወጹ ቁጽርታት ኣብ ካርተላኹም ባዕሎም ይምልከቱ። ቢንጎ ግን ንስኻትኩም ትጠውቑ።"],
+"ኳስ በድምፅ መጥራት":["Speak the balls aloud","Kubbaa sagaleedhaan waamuu","ኳስ ብድምጺ ምጽዋዕ"],
+"ቁጥሩ ሲወጣ ድምፁ ያነብበዋል።":["Reads each number aloud when it is called.","Lakkoofsi yeroo ba'u sagaleedhaan dubbisa.","ቁጽሪ ክወጽእ ከሎ ብድምጺ የንብቦ።"],
+"ማጥቆርያ ቀለም":["Mark color","Halluu mallattoo","ሕብሪ ምልክት"],
+"ቀይ":["Red","Diimaa","ቀይሕ"],
+"ሰማያዊ":["Blue","Cuquliqaa","ሰማያዊ"],
+"አረንጓዴ":["Green","Magariisa","ቀጠልያ"],
+"ብርቱካናማ":["Orange","Burtukaana","ብርቱካናዊ"],
+"ወይን ጠጅ":["Purple","Dhaaman","ሃምራዊ"],
+// ---- rules ----
+"የአጠቃቀም ደንቦች":["Terms of use","Seera itti fayyadamaa","ደንቢ ኣጠቓቕማ"],
+"ካርቴላ ከመግዛት በኋላ ለጨዋታው Register ማድረግ አለብዎት።":["After buying a card you must Register it for the game.","Erga kaartelaa bitattanii booda taphaaf Register gochuu qabdu.","ድሕሪ ካርተላ ምግዛእ ንጸወታ Register ክትገብሩ ኣለኩም።"],
+"ቢንጎ ሲሞሉ በትክክል ሳይሞሉ \"Bingo\" ቢሉ ካርቴላው ይቆለፋል (Blocked)።":["If you call \"Bingo\" without a correct fill, the card is locked (Blocked).","Bingoo sirritti guutuu malee \"Bingo\" yoo jettan kaartelaan ni cufama (Blocked).","ብትኽክል ከይመልአኩም \"Bingo\" እንተ ኢልኩም ካርተላ ትዕጾ (Blocked)።"],
+"ብዙ ካርቴላ ቢገዙም እያንዳንዱ ካርቴላ ለብቻው ይወዳደራል።":["Even if you buy many cards, each card competes on its own.","Kaartelaa baay'ee yoo bitattan iyyuu, kaartelaan tokkoon tokkoon isaa of danda'ee dorgoma.","ብዙሓት ካርተላታት እንተ ገዚእኩም እውን ነፍሲ ወከፍ ካርተላ ብርእሱ ይወዳደር።"],
+"ዲፖዚት በቴሌብር ወይም በባንክ ያድርጉና Ref ቁጥሩን ያስገቡ፤ አድሚኑ ካረጋገጠ በኋላ ሒሳብዎ ይጨምራል።":["Deposit by Telebirr or bank and enter the Ref number; your balance is credited after the admin confirms.","Telebirr ykn baankiin galchaatii lakkoofsa Ref galchaa; erga admiinichi mirkaneessee booda herregni keessan dabalama.","ብቴሌብር ወይ ብባንክ ዲፖዚት ግበሩ ቁጽሪ Ref ኣእትዉ፤ ኣድሚን ድሕሪ ዘረጋግጽ ሒሳብኩም ይውስኽ።"],
+"ከግንኙነት (ኔትዎርክ) ችግር ለሚፈጠር ኪሳራ አፑ ኃላፊነት አይወስድም።":["The app takes no responsibility for losses caused by network problems.","Appiin miidhaa rakkoo networkii irraa ta'eef itti gaafatamummaa hin fudhatu.","ኣፕ ንዝኾነ ብጸገም ኔትወርክ ዝመጽእ ክሳራ ሓላፍነት ኣይወስድን።"],
+"የጨዋታ ሕጎች":["Game rules","Seera taphaa","ሕግታት ጸወታ"],
+"የመጨረሻው የወጣ ቁጥር (Active Number) በሞሉት መስመር ውስጥ ከሌለ ቢንጎው ትክክለኛ አሸናፊ አይሆንም።":["If the last called number (Active Number) is not in the line you completed, the Bingo is not a valid win.","Lakkoofsi dhumaa ba'e (Active Number) sarara guutan keessa yoo hin jiraanne bingoon mo'annoo sirrii hin ta'u.","እቲ ናይ መወዳእታ ዝወጸ ቁጽሪ (Active Number) ኣብቲ ዝመልኣኽሞ መስመር እንተዘየሎ እቲ ቢንጎ ቅኑዕ ዓወት ኣይኮነን።"],
+"ቁጥሩ ካልወጣ ማጥቆር አይቻልም።":["You can't mark a number that hasn't been called.","Lakkoofsi hin ba'in mallattoo godhamuu hin danda'u.","ቁጽሪ ክሳብ ዘይወጽእ ምምልካት ኣይከኣልን።"],
+"ቢንጎ ከተባለ በኋላ ሌሎች ለ30 ሰከንድ ቢንጎ ማለት ይችላሉ።":["After Bingo is called, others can call Bingo for 30 seconds.","Bingoon erga jedhamee booda warri kaan sekondii 30f bingoo jechuu danda'u.","ቢንጎ ድሕሪ ዝባሃል ካልኦት ን30 ካልኣይ ቢንጎ ክብሉ ይኽእሉ።"],
+"ዝጋ":["Close","Cufi","ዕጸው"],
+"ቢንጎ":["Bingo","Bingoo","ቢንጎ"],
+"አሸናፊ":["Winner","Mo'ataa","ዓዋቲ"],
+"ካርድ":["Card","Kaartii","ካርድ"],
+"ገባኝ":["Got it","Naaf galeera","ተረዲኡኒ"],
+"የባለቤት (Owner) መለያ ይፍጠሩ":["Create the Owner account","Herrega Abbaa Qabeenyaa (Owner) uumaa","ናይ ወናኒ (Owner) ኣካውንት ፍጠሩ"],
+"የመጀመሪያ ጊዜ ማዋቀር። ይህ መለያ ሁሉንም ይቆጣጠራል።":["First-time setup. This account controls everything.","Qindaa'ina yeroo jalqabaa. Herregni kun hunda to'ata.","ናይ መጀመርታ ግዜ ምድላው። እዚ ኣካውንት ኩሉ ይቆጻጸር።"],
+"የጨዋታ ሂንቶች":["Game hints","Ibsa taphaa","ሒንት ጸወታ"],
+"ካርቴላ አጥፋ":["Delete card","Kaartelaa haqi","ካርተላ ደምስስ"],
+"ይህን ካርቴላ ለማጥፋት እርግጠኛ ነህ? ክፍያው ወደ ሒሳብህ ይመለሳል።":["Are you sure you want to delete this card? The payment is returned to your balance.","Kaartelaa kana haquuf mirkanaa'aadhaa? Kaffaltiin gara herrega keessanii deebi'a.","እዛ ካርተላ ክትደምስስ ርግጸኛ ዲኻ? ክፍሊት ናብ ሒሳብካ ይምለስ።"],
+"አይ":["No","Lakki","ኣይፋል"],
+"አዎ":["Yes","Eeyyee","እወ"],
+// ---- statuses / roles ----
+"ኦነር":["Owner","Abbaa qabeenyaa","ኦነር"],
+"ተጫዋች":["Player","Taphataa","ተጻዋቲ"],
+"ቀጣይ ጨዋታ":["Next game","Taphaa itti aanu","ዝቕጽል ጸወታ"],
+"በዝግጅት":["Preparing","Qophiirra","ኣብ ምድላው"],
+"በጨዋታ ላይ":["In play","Taphaarra","ኣብ ጸወታ"],
+"ቢንጎ ተብሏል":["Bingo called","Bingoon jedhameera","ቢንጎ ተባሂሉ"],
+"ጨዋታ ተጠናቋል":["Game over","Taphni xumurameera","ጸወታ ተወዲኡ"],
+"ተላከ":["Sent","Ergame","ተላኢኹ"],
+"ተቀበለ":["Received","Fudhatame","ተቐቢሉ"],
+"ለቀጣይ ጨዋታ":["For next game","Taphaa itti aanuuf","ንዝቕጽል ጸወታ"],
+"ትክክለኛ ቢንጎ":["Valid Bingo","Bingoo sirrii","ቅኑዕ ቢንጎ"],
+"የተሳሳተ ቢንጎ":["Wrong Bingo","Bingoo dogoggoraa","ጌጋ ቢንጎ"],
+"የታሰረ (Blocked)":["Blocked","Kan hidhame (Blocked)","ዝተኣሰረ (Blocked)"],
+"ስልክ/አካውንት":["Phone/Account","Bilbila/Herrega","ተሌፎን/ኣካውንት"],
+// ---- game types ----
+"መስመር (1 Line)":["Line (1 Line)","Sarara (1)","መስመር (1 Line)"],
+"2 መስመር":["2 Lines","Sarara 2","2 መስመር"],
+"4 ፍሪ የማይነኩ መስመሮች":["4 lines not touching FREE","Sarara 4 FREE hin tuqne","4 FREE ዘይትንክፉ መስመራት"],
+"ሙሉ ቤት (Full House)":["Full House","Mana guutuu (Full House)","ምሉእ ቤት (Full House)"],
+"4 ጥግ (Four Corners)":["Four Corners","Golee 4 (Four Corners)","4 ኩርናዕ (Four Corners)"],
+"X ቅርጽ":["X shape","Bifa X","ቅርጺ X"],
+"Z ቅርጽ":["Z shape","Bifa Z","ቅርጺ Z"],
+"T ቅርጽ":["T shape","Bifa T","ቅርጺ T"],
+"L ቅርጽ":["L shape","Bifa L","ቅርጺ L"],
+"U ቅርጽ":["U shape","Bifa U","ቅርጺ U"],
+"H ቅርጽ":["H shape","Bifa H","ቅርጺ H"],
+"N ቅርጽ":["N shape","Bifa N","ቅርጺ N"],
+"C ቅርጽ":["C shape","Bifa C","ቅርጺ C"],
+"Y ቅርጽ":["Y shape","Bifa Y","ቅርጺ Y"],
+"ፕላስ (+)":["Plus (+)","Pilaasii (+)","ፕላስ (+)"],
+"ክፈፍ (Frame)":["Frame","Fireemii (Frame)","ክፈፍ (Frame)"],
+"አልማዝ (Diamond)":["Diamond","Dayaamandii (Diamond)","ኣልማዝ (Diamond)"],
+"ውስጠኛ ካሬ":["Inner square","Iskuweerii keessaa","ውሽጣዊ ካሬ"],
+"አንድ ሙሉ መስመር (አግድም፣ ቁልቁል ወይም ዲያጎናል) ሲሞላ ቢንጎ ነው። መሃል ያለው FREE ቦታ እንደ ተሞላ ይቆጠራል።":["One full line (horizontal, vertical or diagonal) is Bingo. The center FREE cell counts as filled.","Sarara guutuu tokko (sirna, olii gadi ykn diagonaalii) yoo guutame bingoodha. Iddoon FREE giddugaleessa jiru akka guutametti lakkaa'ama.","ሓደ ምሉእ መስመር (ሓፈፍ፣ ቁሩብ ወይ ዲያጎናል) ምስ ዝመልእ ቢንጎ እዩ። ኣብ ማእከል ዘሎ FREE ቦታ ከም ዝመልአ ይቑጸር።"],
+"2 ሙሉ መስመሮች (በማናቸውም አቅጣጫ) ሲሞሉ ቢንጎ ነው። FREE ቦታ እንደ ተሞላ ይቆጠራል።":["2 full lines (in any direction) is Bingo. The FREE cell counts as filled.","Sarara guutuu 2 (kallattii kamiinuu) yoo guutaman bingoodha. Iddoon FREE akka guutametti lakkaa'ama.","2 ምሉእ መስመራት (ኣብ ዝኾነ ኣቅጣጫ) ምስ ዝመልኡ ቢንጎ እዩ። FREE ቦታ ከም ዝመልአ ይቑጸር።"],
+"4 ሙሉ መስመሮች ሲሞሉ ቢንጎ ነው፤ ነገር ግን መስመሮቹ መሃል ያለውን FREE ቦታ መንካት (ማለፍ) የለባቸውም። 3ኛው ረድፍ፣ 3ኛው አምድ እና ሁለቱ ዲያጎናሎች አይቆጠሩም።":["4 full lines is Bingo, but the lines must not touch (pass through) the center FREE cell. The 3rd row, 3rd column and both diagonals don't count.","Sarara guutuu 4 yoo guutaman bingoodha; garuu sarariin iddoo FREE giddugaleessaa tuquu (darbuu) hin qabu. Sarara 3ffaa, tarree 3ffaa fi diagonaalii lamaan hin lakkaa'aman.","4 ምሉእ መስመራት ምስ ዝመልኡ ቢንጎ እዩ፤ ግን እቶም መስመራት ኣብ ማእከል ዘሎ FREE ቦታ ክትንክፉ (ክሓልፉ) የብሎምን። እቲ 3ይ ሩባዕ፣ 3ይ ዓምዲ ከምኡውን ክልቲኦም ዲያጎናል ኣይቑጸሩን።"],
+"ሁሉም 25 ቦታዎች ሲሞሉ ቢንጎ ነው (ሙሉ ቤት)።":["Bingo when all 25 cells are filled (Full House).","Iddoon hundi 25 yoo guutaman bingoodha (Mana guutuu).","ኩሎም 25 ቦታታት ምስ ዝመልኡ ቢንጎ እዩ (ምሉእ ቤት)።"],
+"የካርዱ 4ቱ ማዕዘን (ጥግ) ቦታዎች ሲሞሉ ቢንጎ ነው።":["Bingo when the card's 4 corner cells are filled.","Iddoon golee kaartii 4 yoo guutaman bingoodha.","ኣርባዕተ ኩርናዓት ካርድ ምስ ዝመልኡ ቢንጎ እዩ።"],
+"በታች በሚታየው \"{}\" ቅርጽ ያሉ ሁሉም ቦታዎች ሲሞሉ ቢንጎ ነው። FREE ቦታ እንደ ተሞላ ይቆጠራል።":["Bingo when all cells in the \"{}\" pattern shown below are filled. The FREE cell counts as filled.","Iddoon hundi bifa \"{}\" gadii agarsiifame keessa jiran yoo guutaman bingoodha. Iddoon FREE akka guutametti lakkaa'ama.","ኩሎም ኣብ ታሕቲ ዝርአ \"{}\" ቅርጺ ዘለዉ ቦታታት ምስ ዝመልኡ ቢንጎ እዩ። FREE ቦታ ከም ዝመልአ ይቑጸር።"],
+"ለዚህ ጨዋታ ትክክል የሆኑ ቢንጎ (አረንጓዴ) እና የተሳሳቱ (ቀይ) ናቸው፦":["For this game, these are valid Bingos (green) and wrong ones (red):","Taphaa kanaaf bingoon sirrii (magariisa) fi kan dogoggoraa (diimaa) kunooti:","ንዚ ጸወታ ቅኑዕ ቢንጎ (ቀጠልያ) ከምኡውን ጌጋ (ቀይሕ) እዞም ዝስዕቡ እዮም፦"],
+// ---- messages ----
+"ስልክ እና የይለፍ ቃል ያስገቡ":["Enter phone and password","Bilbilaa fi jecha iggitaa galchaa","ተሌፎንን መሕለፊ ቃልን ኣእትዉ"],
+"የተሳሳተ ስልክ ወይም የይለፍ ቃል":["Wrong phone or password","Bilbilli ykn jechi iggitaa dogoggora","ጌጋ ተሌፎን ወይ መሕለፊ ቃል"],
+"ስም ያስገቡ":["Enter a name","Maqaa galchaa","ስም ኣእትዉ"],
+"ትክክለኛ ስልክ (09xxxxxxxx)":["Valid phone (09xxxxxxxx)","Bilbila sirrii (09xxxxxxxx)","ቅኑዕ ተሌፎን (09xxxxxxxx)"],
+"የይለፍ ቃል ቢያንስ 4 ቁምፊ መሆን አለበት":["Password must be at least 4 characters","Jechi iggitaa xiqqaatti qubee 4 ta'uu qaba","መሕለፊ ቃል ብውሑዱ 4 ፊደል ክኸውን ኣለዎ"],
+"የይለፍ ቃል ቢያንስ 4 ቁምፊ":["Password must be at least 4 characters","Jechi iggitaa xiqqaatti qubee 4","መሕለፊ ቃል ብውሑዱ 4 ፊደል"],
+"የይለፍ ቃሉ አይመሳሰልም":["Passwords do not match","Jechoonni iggitaa wal hin fakkaatan","መሕለፊ ቃላት ኣይመሳሰሉን"],
+"ስልኩ ቀድሞ ተመዝግቧል":["This phone is already registered","Bilbilli kun duraan galmaa'eera","እዚ ተሌፎን ቅድሚ ሕጂ ተመዝጊቡ"],
+"ስህተት ተፈጥሯል":["An error occurred","Dogoggorri uumameera","ጌጋ ተፈጢሩ"],
+"ተመዝግበዋል — ይግቡ":["Registered — please log in","Galmaa'aniirtu — seenaa","ተመዝጊብኩም — እተዉ"],
+"የባለቤት መለያ ተፈጥሯል — ይግቡ":["Owner account created — log in","Herregni abbaa qabeenyaa uumameera — seenaa","ናይ ወናኒ ኣካውንት ተፈጢሩ — እተዉ"],
+"ከፍተኛው {} ካርድ":["Maximum {} cards","Kaartelaan olaanaan {}","ዝለዓለ {} ካርድ"],
+"በቂ ቀሪ ሂሳብ የለዎትም":["Insufficient balance","Herregni isin harkaa hin gahu","ዘኽእል ሒሳብ የብልኩምን"],
+"ስህተት":["Error","Dogoggora","ጌጋ"],
+"{} ካርድ ለቀጣይ ጨዋታ ተገዝቷል — Register ማድረግ አይርሱ":["{} card(s) bought for the next game — don't forget to Register","Kaartelaan {} taphaa itti aanuuf bitameera — Register gochuu hin irraanfatinaa","{} ካርድ ንዝቕጽል ጸወታ ተገዚኡ — Register ምግባር ኣይትርስዑ"],
+"{} ካርድ ተገዝቷል — Register ማድረግ አይርሱ":["{} card(s) bought — don't forget to Register","Kaartelaan {} bitameera — Register gochuu hin irraanfatinaa","{} ካርድ ተገዚኡ — Register ምግባር ኣይትርስዑ"],
+"ጨዋታ በመካሄድ ላይ — ለቀጣይ ጨዋታ ካርቴላ ይግዙ":["Game in progress — buy a card for the next game","Taphni adeemsarra jira — taphaa itti aanuuf kaartelaa bitaa","ጸወታ ይካየድ ኣሎ — ንዝቕጽል ጸወታ ካርተላ ግዙኡ"],
+"ምንም ካርቴላ የለም":["No cards","Kaartelaan tokkollee hin jiru","ዋላ ሓንቲ ካርተላ የለን"],
+"ሁሉም ተመዝግበዋል":["All registered","Hundi galmaa'aniiru","ኩሎም ተመዝጊቦም"],
+"ምዝገባ ተሰርዟል":["Registration cancelled","Galmeen haqameera","ምዝገባ ተሰሪዙ"],
+"ጨዋታ በመካሄድ ላይ":["Game in progress","Taphni adeemsarra jira","ጸወታ ይካየድ ኣሎ"],
+"ካርቴላ ይምረጡ":["Select a card","Kaartelaa filadhaa","ካርተላ ምረጹ"],
+"ተመዝግበዋል":["Registered","Galmaa'aniiru","ተመዝጊቦም"],
+"ቁጥሩ ገና አልወጣም":["This number hasn't been called yet","Lakkoofsi kun ammaan hin ba'in","እዚ ቁጽሪ ገና ኣይወጸን"],
+"ምንም የለም":["Nothing here","Homaa hin jiru","ዋላ ሓንቲ የለን"],
+"ምልክቶች ጠፍተዋል":["Marks cleared","Mallattooleen haqamaniiru","ምልክታት ጠፊኡ"],
+"ጨዋታ አልተጀመረም":["The game hasn't started","Taphni hin jalqabne","ጸወታ ኣይጀመረን"],
+"ውሸት ቢንጎ! ካርድ ተቆልፏል":["False Bingo! Card blocked","Bingoon sobaa! Kaartiin cufameera","ሓሶት ቢንጎ! ካርድ ተዓጺዩ"],
+"ቢንጎ! ሌሎች ለ30 ሰከንድ ቢንጎ ማለት ይችላሉ":["Bingo! Others can call Bingo for 30 seconds","Bingoo! Warri kaan sekondii 30f bingoo jechuu danda'u","ቢንጎ! ካልኦት ን30 ካልኣይ ቢንጎ ክብሉ ይኽእሉ"],
+"ካርቴላው አልተገኘም":["Card not found","Kaartelaan hin argamne","እቲ ካርተላ ኣይተረኽበን"],
+"ካርቴላ: {}":["Card: {}","Kaartelaa: {}","ካርተላ: {}"],
+"ስልክ: {}":["Phone: {}","Bilbila: {}","ተሌፎን: {}"],
+"የመጨረሻ ቁጥር: {}":["Last number: {}","Lakkoofsa dhumaa: {}","ናይ መወዳእታ ቁጽሪ: {}"],
+"ካርቴላ ጠፍቷል — {} ብር ተመልሷል":["Card deleted — {} Birr refunded","Kaartelaan haqameera — Birrii {} deebi'eera","ካርተላ ጠፊኡ — {} ብር ተመሊሱ"],
+"ዳግም ያስጀምሩ":["Please reset first","Maaloo dura haaromsaa","ዳግማይ ኣጀምሩ"],
+"ጨዋታ ተጀምሯል":["Game started","Taphni jalqabeera","ጸወታ ተጀሚሩ"],
+"ጨዋታውን ዳግም ላስጀምር? የተገዙ ካርቴላዎች ይጠፋሉ (ገንዘብ አይመለስም)።":["Reset the game? Bought cards will be deleted (money is not refunded).","Taphicha haaromsuu? Kaartelaan bitaman ni haqamu (maallaqni hin deebi'u).","ጸወታ ዳግማይ ልጀምር? ዝተገዝኡ ካርተላታት ይጠፍኡ (ገንዘብ ኣይምለስን)።"],
+"ስህተት፦ {}":["Error: {}","Dogoggora: {}","ጌጋ: {}"],
+"ስህተት፦ SQL አልተሄደም? {}":["Error: was the SQL run? {}","Dogoggora: SQL hin hojjetamnee? {}","ጌጋ: SQL ኣይተኻየደን ድዩ? {}"],
+"ጨዋታ ዳግም ተጀምሯል":["Game has been reset","Taphni haaromfameera","ጸወታ ዳግማይ ጀሚሩ"],
+"ምሳሌ":["Example","Fakkeenya","ኣብነት"],
+"ካርቴላ":["Cards","Kaartelaa","ካርተላ"],
+"ለአሸናፊ":["To winner","Mo'ataaf","ንዓዋቲ"],
+"የቤት ትርፍ":["House profit","Bu'aa mana taphaa","ትርፊ ቤት"],
+"ብር":["Birr","Birrii","ብር"],
+"ተጫዋቾች":["Players","Taphattoota","ተጻወቲ"],
+"ኳሶች":["Balls","Kubbaawwan","ኳሶታት"],
+"ትርፍ":["Profit","Bu'aa","ትርፊ"],
+"እሴቶቹን ያረጋግጡ":["Please check the values","Gatiiwwan mirkaneessaa","እቶም ዋጋታት ኣረጋግጹ"],
+"ተቀምጧል":["Saved","Olkaa'ameera","ተቐሚጡ"],
+"ተቀምጧል — ራስ-ሰር ጨዋታ በርቷል":["Saved — auto game is ON","Olkaa'ameera — taphni ofumaa ifameera","ተቐሚጡ — ባዕላዊ ጸወታ ተኸፊቱ"],
+"ቢያንስ {} ብር":["At least {} Birr","Xiqqaatti Birrii {}","ብውሑዱ {} ብር"],
+"Txn ቁጥር ያስገቡ":["Enter the Txn number","Lakkoofsa Txn galchaa","Txn ቁጽሪ ኣእትዉ"],
+"ጥያቄ ተልኳል — አድሚን ያረጋግጣል":["Request sent — the admin will confirm","Gaaffiin ergameera — admiinichi mirkaneessa","ሕቶ ተላኢኹ — ኣድሚን የረጋግጽ"],
+"ጥያቄ ተልኳል":["Request sent","Gaaffiin ergameera","ሕቶ ተላኢኹ"],
+"ስልክ ያስገቡ":["Enter the phone number","Bilbila galchaa","ተሌፎን ኣእትዉ"],
+"ለራስዎ መላክ አይቻልም":["You can't send to yourself","Of keessaniif ergu hin danda'amu","ንርእስኹም ምልኣኽ ኣይከኣልን"],
+"ይህ ስልክ ያለው ተጠቃሚ አልተገኘም":["No user with this phone was found","Fayyadamaan bilbila kana qabu hin argamne","እዚ ተሌፎን ዘለዎ ተጠቃሚ ኣይተረኽበን"],
+"{} ብር ወደ {} ({}) ይላክ?":["Send {} Birr to {} ({})?","Birrii {} gara {} ({}) haa ergamu?","{} ብር ናብ {} ({}) ይለኣኽ?"],
+"ስህተት — እንደገና ይሞክሩ":["Error — try again","Dogoggora — irra deebi'ii yaalaa","ጌጋ — ከም ብሓድሽ ፈትኑ"],
+"{} ብር ወደ {} ተልኳል":["{} Birr sent to {}","Birrii {} gara {} ergameera","{} ብር ናብ {} ተላኢኹ"],
+"ጥያቄው ቀድሞ ተሰርቷል":["This request was already processed","Gaaffiin kun duraan raawwatameera","እዚ ሕቶ ቅድሚ ሕጂ ተገይሩ"],
+"ስህተት — ሒሳብ መጨመር አልተቻለም":["Error — couldn't add to the balance","Dogoggora — herregatti dabaluun hin danda'amne","ጌጋ — ሒሳብ ምውሳኽ ኣይተኻኣለን"],
+"ተፈቅዷል":["Approved","Mirkanaa'eera","ተፈቒዱ"],
+"ይህን ውሳኔ ልሻር? ጥያቄው ወደ \"በመጠበቅ\" ይመለሳል።":["Undo this decision? The request goes back to \"Pending\".","Murtii kana haquu? Gaaffiin gara \"Eegaa jira\" deebi'a.","እዚ ውሳኔ ይሰረዝ? እቲ ሕቶ ናብ \"ኣብ ምጽባይ\" ይምለስ።"],
+"የተጠቃሚው ቀሪ ሂሳብ ከዲፖዚቱ ያንሳል — መሻር አይቻልም":["The user's balance is lower than the deposit — can't undo","Herregni fayyadamaa galchii irra gadi — haquun hin danda'amu","ሒሳብ እቲ ተጠቃሚ ካብ ዲፖዚት ይነኣስ — ምስራዝ ኣይከኣልን"],
+"የተጠቃሚው ቀሪ ሂሳብ በቂ አይደለም — መሻር አይቻልም":["The user's balance isn't enough — can't undo","Herregni fayyadamaa gahaa miti — haquun hin danda'amu","ሒሳብ እቲ ተጠቃሚ ዘኽእል ኣይኮነን — ምስራዝ ኣይከኣልን"],
+"ተሽሯል":["Undone","Haqameera","ተመሊሱ"],
+"አፕ በርቷል":["App is ON","Appiin ifameera","ኣፕ ተኸፊቱ"],
+"አፕ ጠፍቷል":["App is OFF","Appiin cufameera","ኣፕ ጠፊኡ"],
+"ይህ ስልክ የኦነር ነው":["This phone belongs to the Owner","Bilbilli kun kan abbaa qabeenyaati","እዚ ተሌፎን ናይ ኦነር እዩ"],
+"ይህ ስልክ ቀድሞ ተመዝግቧል። ወደ አድሚን ልቀይረው? (የይለፍ ቃል ይቀየራል)":["This phone is already registered. Change it to an admin? (the password will change)","Bilbilli kun duraan galmaa'eera. Gara admiinii tti jijjiiru? (jechi iggitaa ni jijjiirama)","እዚ ተሌፎን ቅድሚ ሕጂ ተመዝጊቡ። ናብ ኣድሚን ይቕየር? (መሕለፊ ቃል ይቕየር)"],
+"አድሚን ተፈጥሯል":["Admin created","Admiinii uumameera","ኣድሚን ተፈጢሩ"],
+"ይህን አድሚን ወደ ተጫዋችነት ልመልሰው?":["Return this admin to a regular player?","Admiinii kana gara taphataatti haa deebisu?","እዚ ኣድሚን ናብ ተጻዋቲ ይምለስ?"],
+"ተመልሷል":["Restored","Deebi'eera","ተመሊሱ"],
+"አዲስ ጨዋታ ተፈጥሯል":["A new game was created","Taphni haaraan uumameera","ሓድሽ ጸወታ ተፈጢሩ"],
+"ጨዋታው ለመጀመር የቀረ: {} — ካርቴላ ገዝተው Register ያድርጉ":["Time until the game starts: {} — buy cards and Register","Taphni jalqabuuf yeroon hafe: {} — kaartelaa bitaatii Register godhaa","ጸወታ ንምጅማር ዝተረፈ: {} — ካርተላ ገዚኡ Register ግበሩ"],
+"ጨዋታ በመጀመር ላይ…":["Game is starting…","Taphni jalqabaa jira…","ጸወታ ይጅምር ኣሎ…"],
+"ቀጣይ ጨዋታ በቅርቡ ይዘጋጃል…":["Next game will be ready soon…","Taphni itti aanu dhiyootti qophaa'a…","ዝቕጽል ጸወታ ብቕልጡፍ ይሳለጥ…"],
+"ቢንጎ ተብሏል! ሌሎች ቢንጎ ለማለት ቀሪ ሰከንድ: {}":["Bingo called! Seconds left for others to call Bingo: {}","Bingoon jedhameera! Sekondiin warra kaaniif hafe: {}","ቢንጎ ተባሂሉ! ንካልኦት ቢንጎ ንምባል ዝተረፈ ካልኣይ: {}"],
+"ቀጣይ ጨዋታ በ {} — {} ይቀራል":["Next game at {} — {} left","Taphni itti aanu sa'aatii {} — {} hafe","ዝቕጽል ጸወታ ብ {} — {} ይተርፍ"],
+"ኳስ እየተጠራ ነው — በየ {} ሰከንድ":["Balls are being called — every {} seconds","Kubbaan waamamaa jira — sekondii {} hundaa","ኳስ ይጽዋዕ ኣሎ — ኩሉ {} ካልኣይ"],
+"ቢንጎ ተብሏል — ሌሎች እየተጠባበቁ ነው":["Bingo called — others are waiting","Bingoon jedhameera — warri kaan eegaa jiru","ቢንጎ ተባሂሉ — ካልኦት ይጽበዩ ኣለዉ"],
+"ጨዋታ ተጠናቋል — ቀጣይ በቅርቡ ይፈጠራል":["Game over — the next one will be created soon","Taphni xumurameera — kan itti aanu dhiyootti uumama","ጸወታ ተወዲኡ — ዝቕጽል ብቕልጡፍ ይፍጠር"],
+"{} ብር/ካርድ":["{} Birr/card","Birrii {}/kaartii","{} ብር/ካርድ"],
+"ወደ ላይ":["Up","Gara olii","ንላዕሊ"],
+"ካርድ ገና አልገዙም":["You haven't bought a card yet","Kaartii hin bitanne","ካርድ ገና ኣይገዛእኩምን"],
+"ቀዩን + ቁልፍ ይጫኑ":["Press the red + button","Qabduu diimaa + tuqaa","ቀይሕ + መጠወቒ ጥዓቑ"],
+"{} ብር":["{} Birr","Birrii {}","{} ብር"],
+"ምንም ጥያቄ የለም":["No requests","Gaaffiin hin jiru","ዋላ ሓደ ሕቶ የለን"],
+"አስወግድ":["Remove","Balleessi","ኣልግስ"],
+"ምንም አድሚን የለም":["No admins","Admiinii hin jiru","ዋላ ሓደ ኣድሚን የለን"],
+"የዛሬ":["Today","Har'a","ናይ ሎሚ"],
+"የሳምንቱ":["This week","Torban kanaa","ናይ ሰሙን"],
+"የወሩ":["This month","Ji'a kanaa","ናይ ወርሒ"],
+"ያልታወቀ አድሚን (ከዚህ በፊት የተሰሩ)":["Unknown admin (processed earlier)","Admiinii hin beekamne (kan duraan raawwataman)","ዘይተፈልጠ ኣድሚን (ቅድሚ ሕጂ ዝተገብሩ)"],
+"አድሚን #{}":["Admin #{}","Admiinii #{}","ኣድሚን #{}"],
+"ያጸደቀው: {} · የሰረዘው: {} · ጠቅላላ: {}":["Approved: {} · Rejected: {} · Total: {}","Kan mirkaneesse: {} · Kan haqe: {} · Waliigala: {}","ዘጽደቐ: {} · ዝሰረዘ: {} · ጠቕላላ: {}"],
+"ዲፖዚት ({})":["Deposit ({})","Galchii ({})","ዲፖዚት ({})"],
+"ዊዝድሮው ({})":["Withdraw ({})","Baasii ({})","ዊዝድሮው ({})"],
+"የተሰረዘ ({})":["Rejected ({})","Kan haqame ({})","ዝተሰረዘ ({})"],
+"ልዩነት (ዲፖዚት − ዊዝድሮው)":["Difference (deposit − withdraw)","Garaagarummaa (galchii − baasii)","ፍልልይ (ዲፖዚት − ዊዝድሮው)"],
+"ሙሉ ዝርዝር ({})":["Full list ({})","Tarree guutuu ({})","ምሉእ ዝርዝር ({})"],
+"ገና ማንም አላጸደቀም":["No one has approved anything yet","Ammaaf namni tokkollee hin mirkaneessine","ገና ዋላ ሓደ ኣየጽደቐን"],
+"ጠየቀ: {}":["Requested: {}","Gaafate: {}","ሓተተ: {}"],
+"ያጸደቀ/የሰረዘ":["Approved/Rejected by","Kan mirkaneesse/haqe","ዘጽደቐ/ዝሰረዘ"],
+"ሰዓት: {}":["Time: {}","Sa'aatii: {}","ሰዓት: {}"],
+"አዲስ የዲፖዚት ጥያቄ: {} ብር":["New deposit request: {} Birr","Gaaffiin galchii haaraa: Birrii {}","ሓድሽ ሕቶ ዲፖዚት: {} ብር"],
+"አዲስ የዊዝድሮው ጥያቄ: {} ብር":["New withdrawal request: {} Birr","Gaaffiin baasii haaraa: Birrii {}","ሓድሽ ሕቶ ዊዝድሮው: {} ብር"],
+"ተቀድቷል: {}":["Copied: {}","Waraabameera: {}","ተቐዲሑ: {}"]
+,
+"{} ቅርጽ":["{} shape","Bifa {}","ቅርጺ {}"],
+"ልብ (Heart)":["Heart","Onnee (Heart)","ልቢ (Heart)"],
+"የአሸዋ ሰዓት (Hourglass)":["Hourglass","Sa'aatii cirracha (Hourglass)","ናይ ኣሸዋ ሰዓት (Hourglass)"],
+"ፖስታ ማህተም (Stamp)":["Stamp","Chaappaa (Stamp)","ማሕተም (Stamp)"],
+"4 ማህተሞች (4 Stamps)":["4 Stamps","Chaappaa 4 (4 Stamps)","4 ማሕተማት (4 Stamps)"],
+"ኮከብ (Star)":["Star","Urjii (Star)","ኮኾብ (Star)"],
+"ቼከር (Checker)":["Checker","Cheekerii (Checker)","ቼከር (Checker)"],
+"የይለፍ ቃል ረስተዋል?":["Forgot password?","Jecha iggitaa irraanfattanii?","መሕለፊ ቃል ረሲዕኩም?"],
+"ስልክዎን እና አዲስ የይለፍ ቃል ያስገቡ":["Enter your phone and new password","Bilbila fi jecha iggitaa haaraa galchaa","ተሌፎንኩምን ሓድሽ መሕለፊ ቃልን ኣእትዉ"],
+"አዲስ የይለፍ ቃል":["New password","Jecha iggitaa haaraa","ሓድሽ መሕለፊ ቃል"],
+"አዲሱን የይለፍ ቃል ድገም":["Repeat new password","Jecha iggitaa haaraa irra deebi'i","ሓድሽ መሕለፊ ቃል ደግም"],
+"የይለፍ ቃል ቀይር":["Reset password","Jecha iggitaa jijjiiri","መሕለፊ ቃል ቀይር"],
+"ወደ መግቢያ ተመለስ":["Back to login","Gara seensaatti deebi'i","ናብ መእተዊ ተመለስ"],
+"ስልክዎን ያረጋግጡ":["Verify your phone","Bilbila keessan mirkaneessaa","ተሌፎንኩም ኣረጋግጹ"],
+"ኮዱ ወደ {} ተልኳል":["Code sent to {}","Koodiin gara {} ergameera","ኮድ ናብ {} ተላኢኹ"],
+"አረጋግጥ":["Verify","Mirkaneessi","ኣረጋግጽ"],
+"ኮዱን እንደገና ለመላክ {}":["Resend code in {}","Koodii irra deebi'ee ergachuuf {}","ኮድ ደጊም ንምልኣኽ {}"],
+"ኮድ እንደገና ላክ":["Resend code","Koodii irra deebi'ii ergi","ኮድ ደጊምካ ለኣኽ"],
+"ኮዱ ተልኳል":["Code sent","Koodiin ergameera","ኮድ ተላኢኹ"],
+"ኮዱ የተሳሳተ ነው":["Wrong code","Koodiin dogoggora","ኮድ ጌጋ እዩ"],
+"ኮዱ ጊዜው አልፎበታል — እንደገና ይላኩ":["The code expired — resend it","Koodiin yeroon isaa darbeera — irra deebi'ii ergaa","ኮድ ግዜኡ ሓሊፉ — ደጊም ለኣኹ"],
+"ብዙ ጊዜ ሞክረዋል — አዲስ ኮድ ይጠይቁ":["Too many attempts — request a new code","Altokko baay'ee yaalteetta — koodii haaraa gaafadhaa","ብዙሕ ግዜ ፈቲንኩም — ሓድሽ ኮድ ሕተቱ"],
+"{} ሰከንድ ይጠብቁ":["Wait {} seconds","Sekondii {} eegaa","{} ካልኣይ ጽበዩ"],
+"ይህ ስልክ አልተመዘገበም":["This phone is not registered","Bilbilli kun hin galmaa'ne","እዚ ተሌፎን ኣይተመዝገበን"],
+"የኤስኤምኤስ አገልግሎት አልተዋቀረም":["The SMS service isn't configured","Tajaajilli SMS hin qindaa'ine","ኣገልግሎት SMS ኣይተዳለወን"],
+"ተረጋግጧል":["Verified","Mirkanaa'eera","ተረጋጊጹ"],
+"ስልክዎ ገና አልተረጋገጠም — ኮድ ተልኳል":["Your phone isn't verified yet — a code was sent","Bilbilli keessan ammaan hin mirkanaa'ne — koodiin ergameera","ተሌፎንኩም ገና ኣይተረጋገጸን — ኮድ ተላኢኹ"],
+"የሙከራ ኮድ: {}":["Test code: {}","Koodii yaalii: {}","ናይ ፈተነ ኮድ: {}"],
+"Ref ቁጥር ተገኝቷል: {}":["Ref number found: {}","Lakkoofsi Ref argameera: {}","ቁጽሪ Ref ተረኺቡ: {}"],
+"Ref ቁጥር አልተገኘም — ያረጋግጡ":["No Ref number found — please check","Lakkoofsi Ref hin argamne — mirkaneessaa","ቁጽሪ Ref ኣይተረኽበን — ኣረጋግጹ"],
+"የጨዋታዎች ዝርዝር":["Game queue","Tarree taphootaa","ዝርዝር ጸወታታት"],
+"ጨዋታዎችን ያዝዙ — አንዱ ሲያልቅ ቀጣዩ ይጀምራል፤ መጨረሻው ሲያልቅ ከመጀመሪያው ይደግማል። እርስዎ እስኪያቆሙ ድረስ ይቀጥላል።":["Order your games — when one ends the next one starts; when the last one ends it repeats from the first. It continues until you stop it.","Taphoota ajajaa — tokko yeroo xumuramu isa itti aanu jalqaba; inni dhumaa yeroo xumuramu inni jalqabaa irraa deebi'a. Hanga isin dhaabdanitti itti fufa.","ጸወታታት ኣዝዙ — ሓደ ምስ ዛዘመ ዝቕጽል ይጅምር፤ እቲ መወዳእታ ምስ ተወድአ ካብ ቀዳማይ ይድገም። ንስኹም ክሳብ እትቑርጹ ይቕጽል።"],
+"ጨዋታ ጨምር":["Add game","Taphaa dabali","ጸወታ ወስኽ"],
+"10 ጨዋታ ጨምር":["Add 10 games","Taphaa 10 dabali","10 ጸወታ ወስኽ"],
+"ሁሉንም አጥፋ":["Clear all","Hunda haqi","ኩሉ ደምስስ"],
+"ሁሉንም ጨዋታዎች ከዝርዝሩ ላጥፋ?":["Remove all games from the queue?","Taphoota hunda tarree irraa haquu?","ኩሎም ጸወታታት ካብ ዝርዝር ይጥፍኡ?"],
+"ዝርዝሩ ባዶ ነው — ጨዋታ ይጨምሩ":["The queue is empty — add a game","Tarreen duwwaadha — taphaa dabalaa","ዝርዝር ባዶ እዩ — ጸወታ ወስኹ"],
+"ዝርዝሩ ባዶ ነው — ቢያንስ አንድ ጨዋታ ይጨምሩ":["The queue is empty — add at least one game","Tarreen duwwaadha — xiqqaatti taphaa tokko dabalaa","ዝርዝር ባዶ እዩ — ብውሑዱ ሓደ ጸወታ ወስኹ"],
+"አሁን":["Now","Amma","ሕጂ"],
+"ቀጣይ":["Next","Itti aanu","ዝቕጽል"],
+"{} ብር · {}% · {} ሰከንድ · {} ደቂቃ":["{} Birr · {}% · {} sec · {} min","Birrii {} · {}% · sek. {} · daq. {}","{} ብር · {}% · {} ካልኣይ · {} ደቒቕ"],
+"ጨዋታ አስተካክል":["Edit game","Taphaa sirreessi","ጸወታ ኣስተኻኽል"],
+"ዋጋ (ብር)":["Price (Birr)","Gatii (Birrii)","ዋጋ (ብር)"],
+"ዝግጅት ጊዜ (ደቂቃ)":["Registration time (minutes)","Yeroo galmee (daqiiqaa)","ግዜ ምዝገባ (ደቒቕ)"],
+"ጨዋታው ከመጀመሩ በፊት ተጫዋቾች ካርቴላ ገዝተው የሚመዘገቡበት ጊዜ።":["The time players have to buy cards and register before the game starts.","Yeroo taphni hin jalqabin dura taphattoonni kaartelaa bitatanii itti galmaa'an.","ቅድሚ ጸወታ ምጅማሩ ተጻወቲ ካርተላ ገዚኦም ዝምዝገቡሉ ግዜ።"],
+"ሰርዝ":["Cancel","Dhiisi","ሰርዝ"],
+"አጥፋ":["Delete","Haqi","ደምስስ"],
+"ጠቅላላ ቅንብር":["General settings","Qindaa'ina waliigalaa","ጠቕላላ ቅጥዓት"],
+"ዳታቤዝ ገና አልተዘመነም — b13_setup_v8 SQL ን ያሂዱ":["The database isn't updated yet — run the b13_setup_v8 SQL","Kuusaan daataa ammaan hin haaromfamne — SQL b13_setup_v8 hojjechiisaa","ዳታቤዝ ገና ኣይተሓዲሱን — b13_setup_v8 SQL ኣካይዱ"],
+"OTP ገና አልተዋቀረም — በቀጥታ ገብተዋል":["OTP isn't set up yet — you were logged in directly","OTP ammaan hin qindaa'ine — kallattiin seentaniirtu","OTP ገና ኣይተዳለወን — ብቀጥታ ኣቲኹም"],
+"ዝርዝሩ አልተቀመጠም — ዳታቤዝ ገና አልተዘመነም (SQL ያሂዱ)":["The queue wasn't saved — database not updated (run the SQL)","Tarreen hin olkaa'amne — kuusaan daataa hin haaromfamne (SQL hojjechiisaa)","ዝርዝር ኣይተቐመጠን — ዳታቤዝ ገና ኣይተሓዲሱን (SQL ኣካይዱ)"],"ዳታቤዝ ገና አልተዘመነም":["Database not updated yet","Kuusaan daataa ammaan hin haaromfamne","ዳታቤዝ ገና ኣይተሓዲሱን"],
+"የጎደሉ ክፍሎች: {}":["Missing parts: {}","Kutaawwan hafan: {}","ዝጎደሉ ክፍልታት: {}"],
+"1) «SQL ቅዳ» ን ይጫኑ · 2) Supabase → SQL Editor ውስጥ paste አድርገው Run ይጫኑ · 3) «እንደገና ፈትሽ» ይጫኑ":["1) Tap «Copy SQL» · 2) Paste it in Supabase → SQL Editor and press Run · 3) Tap «Check again»","1) «SQL waraabi» tuqaa · 2) Supabase → SQL Editor keessatti paste godhaatii Run tuqaa · 3) «Irra deebi'ii mirkaneessi» tuqaa","1) «SQL ቐድሕ» ጠውቑ · 2) ኣብ Supabase → SQL Editor paste ገይርኩም Run ጠውቑ · 3) «ደጊም ፈትሽ» ጠውቑ"],
+"SQL ቅዳ":["Copy SQL","SQL waraabi","SQL ቐድሕ"],
+"እንደገና ፈትሽ":["Check again","Irra deebi'ii mirkaneessi","ደጊም ፈትሽ"],
+"SQL ተቀድቷል — በ Supabase SQL Editor ውስጥ paste ያድርጉ":["SQL copied — paste it in Supabase SQL Editor","SQL waraabameera — Supabase SQL Editor keessatti paste godhaa","SQL ተቐዲሑ — ኣብ Supabase SQL Editor paste ግበሩ"],
+"ኮፒ አልተሳካም":["Copy failed","Waraabuun hin milkoofne","ምቕዳሕ ኣይተዓወተን"],
+"ዳታቤዝ ተዘምኗል":["Database is up to date","Kuusaan daataa haaromfameera","ዳታቤዝ ተሓዲሱ"],
+"ራስ-ሰር ጀምር":["Start auto","Ofumaan jalqabi","ባዕላዊ ጀምር"],
+"አቁም":["Stop","Dhaabi","ኣቋርጽ"],
+"የኳስ ጥሪ":["Ball call","Waamicha kubbaa","ጻውዒት ኳስ"],
+"{} ሰ":["{} s","{} sek","{} ካ"],
+"የማሸብለያ ዘዴ":["Scroll mode","Haala sosocho'uu","ኣገባብ ምስሓብ"],
+"ካርቴላ ብቻ ይሸብለል":["Only cards scroll","Kaartelaan qofa haa sosocho'u","ካርተላ ጥራይ ይሸብል"],
+"ከቁጥር ቦርድ ጋር አብሮ":["Together with the number board","Gabatee lakkoofsaa wajjin","ምስ ቦርድ ቁጽሪ ሓቢሩ"],
+"ለዚህ ጨዋታ ትክክል የሆኑ ቢንጎ (አረንጓዴ) እና የተሳሳቱ (ቀይ) ናቸው \"{}\"።":["For this game, the valid Bingos (green) and wrong ones (red) are \"{}\".","Taphaa kanaaf bingoon sirrii (magariisa) fi kan dogoggoraa (diimaa) \"{}\" dha.","ንዚ ጸወታ ቅኑዕ ቢንጎ (ቀጠልያ) ከምኡውን ጌጋ (ቀይሕ) \"{}\" እዮም።"],
+"አዲስ ጨዋታ ፍጠር":["Create new game","Taphaa haaraa uumi","ሓድሽ ጸወታ ፍጠር"],
+"አሁን ያለው ጨዋታ ይቋረጣል። አዲስ ልጀምር?":["The current game will be stopped. Start a new one?","Taphni amma jiru ni dhaabama. Haaraa jalqabu?","ሕጂ ዘሎ ጸወታ ይቋረጽ። ሓድሽ ይጀምር?"],
+"ማንም አልተመዘገበም — ተጫዋች እስኪመዘገብ ይጠብቃል":["Nobody is registered — waiting for a player to register","Namni tokkollee hin galmaa'ne — taphataan hanga galmaa'utti eegaa jira","ዋላ ሓደ ኣይተመዝገበን — ተጻዋቲ ክሳብ ዝምዝገብ ይጽበ"],
+"የክራባት ቀስት (Bow tie)":["Bow tie","Hidhaa morma (Bow tie)","ቀስቲ ክራቫት (Bow tie)"],
+"ካይት (Kite)":["Kite","Kaayitii (Kite)","ካይት (Kite)"],
+"ወደ ላይ ቀስት (Arrow up)":["Arrow up","Xiyyeeffannoo gara ol (Arrow up)","ናብ ላዕሊ ፍላጻ (Arrow up)"],
+"ወደ ቀኝ ቀስት (Arrow right)":["Arrow right","Xiyyeeffannoo gara mirga (Arrow right)","ናብ የማን ፍላጻ (Arrow right)"],
+"ቤት (House)":["House","Mana (House)","ገዛ (House)"],
+"ዛፍ (Tree)":["Tree","Mukaa (Tree)","ኦም (Tree)"],
+"ጃንጥላ (Umbrella)":["Umbrella","Faana (Umbrella)","ጃንጥላ (Umbrella)"],
+"ሃሽ (#)":["Hash (#)","Haashii (#)","ሃሽ (#)"],
+"መስኮት (Window)":["Window","Foddaa (Window)","መስኮት (Window)"],
+"ትንሽ X (Small X)":["Small X","X xiqqaa (Small X)","ንእሽቶ X (Small X)"],
+"4 ጥግ + መሃል":["Four corners + center","Golee 4 + giddugaleessa","4 ኩርናዕ + ማእከል"],
+"ደረጃ (Stairs)":["Stairs","Sadarkaa (Stairs)","ደረጃ (Stairs)"],
+"መብረቅ (Bolt)":["Lightning bolt","Balaqqeessaa (Bolt)","መብረቅ (Bolt)"],
+"የወጡ ቁጥሮች":["Called numbers","Lakkoofsota ba'an","ዝወጹ ቁጽርታት"],
+"ገና ኳስ አልወጣም":["No ball called yet","Kubbaan ammaan hin ba'in","ገና ኳስ ኣይወጸን"]
+};
+const LI = { en:0, om:1, ti:2 };
+const EX = {}, PAT = [];
+Object.keys(I18N).forEach(k => {
+  const key = k.replace(/\s+/g, ' ').trim();
+  if (key.includes('{}')) PAT.push({ re: new RegExp('^' + key.split('{}').map(x => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('(.+?)') + '$'), t: I18N[k], n: key.length });
+  else EX[key] = I18N[k];
+});
+PAT.sort((a, b) => b.n - a.n);
+function i18nLook(x, li) {
+  const e = EX[x]; if (e) return e[li];
+  for (const p of PAT) { const m = x.match(p.re); if (m) { let i = 0; return p.t[li].replace(/\{\}/g, () => i18nCore(m[++i] || '', li)); } }
+  return null;
+}
+function i18nCore(c, li) {
+  let r = i18nLook(c, li); if (r !== null) return r;
+  const pm = c.match(/^[^\p{L}\p{N}]+/u);
+  if (pm) { r = i18nLook(c.slice(pm[0].length), li); if (r !== null) return pm[0] + r; }
+  const m = c.match(/^([^\p{L}\p{N}]*)([\s\S]*?)([^\p{L}\p{N}%]*)$/u);
+  if (m && m[2] && m[2] !== c) {
+    r = i18nLook(m[2], li);
+    if (r !== null) return m[1] + r + (li === 2 ? m[3] : m[3].replace(/፦/g, ':').replace(/።/g, '.').replace(/፣/g, ','));
+  }
+  return c;
+}
+function tr(s, lg) {
+  const lang = lg || prefs.lang;
+  if (typeof s !== 'string' || lang === 'am' || !LI.hasOwnProperty(lang) || !/[\u1200-\u137F]/.test(s)) return s;
+  const m = s.match(/^(\s*)([\s\S]*?)(\s*)$/);
+  return m[1] + i18nCore(m[2].replace(/\u00a0/g, ' ').replace(/\s+/g, ' '), LI[lang]) + m[3];
+}
+function trNode(n) {
+  const v = n.nodeValue;
+  let orig = v;
+  if (n.__out !== undefined && v === n.__out) orig = n.__am;
+  if (!/[\u1200-\u137F]/.test(orig)) return;
+  const out = prefs.lang === 'am' ? orig : tr(orig);
+  n.__am = orig; n.__out = out;
+  if (out !== v) n.nodeValue = out;
+}
+function trAttr(el) {
+  const v = el.getAttribute('placeholder'); if (v === null) return;
+  if (el.__phOut !== undefined && v === el.__phOut) { /* ours */ } else el.__phAm = v;
+  const out = prefs.lang === 'am' ? el.__phAm : tr(el.__phAm);
+  el.__phOut = out; if (out !== v) el.setAttribute('placeholder', out);
+}
+function trTree(root) {
+  if (root.nodeType === 3) return trNode(root);
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: n => /^(SCRIPT|STYLE|TEXTAREA)$/.test(n.parentNode ? n.parentNode.nodeName : '') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
+  const arr = []; let n; while ((n = w.nextNode())) arr.push(n);
+  arr.forEach(trNode);
+  if (root.querySelectorAll) root.querySelectorAll('[placeholder]').forEach(trAttr);
+}
+const MO_OPTS = { childList: true, subtree: true, characterData: true };
+const i18nMO = new MutationObserver(ms => {
+  if (prefs.lang === 'am') return;
+  i18nMO.disconnect();
+  try { ms.forEach(m => { if (m.type === 'characterData') trNode(m.target); else m.addedNodes.forEach(a => { if (a.nodeType === 3) trNode(a); else if (a.nodeType === 1) trTree(a); }); }); }
+  finally { i18nMO.observe(document.body, MO_OPTS); }
+});
+i18nMO.observe(document.body, MO_OPTS);
+const _confirm = window.confirm.bind(window), _alert = window.alert.bind(window), _prompt = window.prompt.bind(window);
+window.confirm = m => _confirm(tr(m)); window.alert = m => _alert(tr(m)); window.prompt = (m, d) => _prompt(tr(m), d);
+let appliedLang = 'am';
+function applyLang() {
+  if (appliedLang === prefs.lang) return;
+  appliedLang = prefs.lang;
+  document.documentElement.lang = prefs.lang;
+  i18nMO.disconnect();
+  try { trTree(document.body); } finally { i18nMO.observe(document.body, MO_OPTS); }
+  lastCardsSig = ''; lastBoardKey = ''; lastQSig = ''; lastStripKey = '';
+  try { if (cur) render(); } catch (e) {}
+}
+
+function setPref(k, v) {
+  prefs[k] = v;
+  try { localStorage.setItem('b13_prefs', JSON.stringify(prefs)); } catch (e) {}
+  if (k === 'gs' && v !== 'off') askNotifyPerm();
+  if (k === 'autoMark' && v) setTimeout(async () => { await autoMarkNow(); render(); }, 50);
+  applyPrefs();
+  if (page === 'bingo') renderCards();
+  render();
+}
+function applyPrefs() {
+  document.documentElement.style.setProperty('--mk', COLORS[prefs.color] || COLORS.red);
+  document.documentElement.classList.toggle('light', prefs.theme === 'light');
+  const t = (id, on) => $(id) && $(id).classList.toggle('on', !!on);
+  t('tgNotify', prefs.notify); t('tgSound', prefs.sound); t('tgMarkAll', prefs.markAll); t('tgAutoMark', prefs.autoMark); t('tgVoice', prefs.voice);
+  document.querySelectorAll('.exp-only').forEach(e => e.classList.toggle('hidden', !prefs.showInfo));
+  if ($('ballStrip')) $('ballStrip').classList.toggle('hidden', prefs.showInfo);
+  const bt = $('btnInfoToggle'); if (bt) bt.textContent = prefs.showInfo ? '⌃ Show Less' : '⌄ Show More';
+  const s = (id, v) => $(id) && ($(id).value = v);
+  s('sCols', prefs.cols); s('sOrder', prefs.order); s('sColor', prefs.color);
+  s('sGs', prefs.gs); s('sTheme', prefs.theme); s('sLang', prefs.lang);
+  document.querySelectorAll('.lgsel,.lgsel2').forEach(e => e.value = prefs.lang);
+  s('sScroll', prefs.scrollMode);
+  if ($('app')) $('app').classList.toggle('bf', page === 'bingo' && prefs.scrollMode === 'cards');
+  applyLang();
+}
+function askNotifyPerm() { try { if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission(); } catch (e) {} }
+function notifyUser(msg) {
+  toast(msg, 'i'); beep();
+  try { if ('Notification' in window && Notification.permission === 'granted') new Notification('B13 Bingo', { body: tr(msg) }); } catch (e) {}
+}
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const SETUP_SQL = "-- ===== B13 BINGO v8 — Supabase SQL (run once; safe to re-run) =====\n\n-- 1) columns\nalter table settings add column if not exists auto_on boolean default false;\nalter table settings add column if not exists gap_min int default 10;\nalter table settings add column if not exists game_type text default 'line';\nalter table settings add column if not exists game_queue jsonb default '[]'::jsonb;\nalter table settings add column if not exists queue_idx int default 0;\nalter table games add column if not exists start_at timestamptz;\nalter table games add column if not exists paid boolean default false;\nalter table games add column if not exists prize numeric default 0;\nalter table games add column if not exists price numeric;\nalter table games add column if not exists winner_pct int;\nalter table games add column if not exists interval_sec int;\nalter table transactions add column if not exists approved_by bigint references users(id);\nalter table transactions add column if not exists created_at timestamptz default now();\nalter table transactions drop constraint if exists transactions_type_check;\nalter table games drop constraint if exists games_type_check;\nalter table settings drop constraint if exists settings_game_type_check;\nalter table cards alter column game_id drop not null;\nalter table users add column if not exists verified boolean default true;\n\n-- 2) game finish (pays the winner)\ncreate or replace function b13_finish(p_game bigint) returns void\nlanguage plpgsql security definer set search_path = public as $$\ndeclare g games%rowtype; s settings%rowtype; v_wn int; v_pool numeric; v_prize numeric; v_per numeric;\nbegin\n  select * into s from settings where id = 1;\n  select * into g from games where id = p_game for update;\n  if not found or g.status = 'finished' then return; end if;\n  select coalesce(sum(coalesce(price, g.price, s.price)), 0) into v_pool from cards where game_id = p_game and registered;\n  select count(*) into v_wn from cards where game_id = p_game and won;\n  v_prize := floor(v_pool * coalesce(g.winner_pct, s.winner_pct, 70) / 100);\n  if v_wn > 0 and not coalesce(g.paid, false) then\n    v_per := floor(v_prize / v_wn);\n    update users u set balance = u.balance + v_per * w.c\n      from (select user_id, count(*) c from cards where game_id = p_game and won group by user_id) w\n      where u.id = w.user_id;\n    insert into transactions (user_id, type, amount, method, ref, status, processed_at)\n      select user_id, 'PRIZE', v_per * count(*), 'Prize', coalesce(g.code, ''), 'APPROVED', now()\n      from cards where game_id = p_game and won group by user_id;\n  end if;\n  update games set status = 'finished', finished_at = now(), paid = true, prize = v_prize, draw_on = false where id = p_game;\nend; $$;\n\n-- 3) apply the next game from the queue (loops forever)\ncreate or replace function b13_apply_next(p_game bigint) returns void\nlanguage plpgsql security definer set search_path = public as $$\ndeclare s settings%rowtype; q jsonb; n int; it jsonb; i int;\nbegin\n  select * into s from settings where id = 1;\n  q := coalesce(s.game_queue, '[]'::jsonb); n := jsonb_array_length(q);\n  if n > 0 then\n    i := coalesce(s.queue_idx, 0) % n; it := q -> i;\n    update games set type = coalesce(it->>'type', 'line'),\n      price = nullif(it->>'price','')::numeric, winner_pct = nullif(it->>'pct','')::int,\n      interval_sec = nullif(it->>'int','')::int,\n      start_at = now() + make_interval(mins => greatest(coalesce(nullif(it->>'wait','')::int, s.gap_min, 10), 1))\n      where id = p_game;\n    update settings set queue_idx = (i + 1) % n where id = 1;\n  else\n    update games set type = coalesce(s.game_type, type, 'line'), price = null, winner_pct = null, interval_sec = null,\n      start_at = now() + make_interval(mins => greatest(coalesce(s.gap_min, 10), 1)) where id = p_game;\n  end if;\nend; $$;\n\n-- 4) the game engine\ncreate or replace function auto_tick() returns text\nlanguage plpgsql security definer set search_path = public as $$\ndeclare s settings%rowtype; g games%rowtype;\n  n int; v_reg int; v_new bigint; d int[]; ivl interval;\nbegin\n  select * into s from settings where id = 1;\n  if not found or not coalesce(s.app_on, true) then return 'off'; end if;\n  select * into g from games order by id desc limit 1 for update;\n  if not found then return 'nogame'; end if;\n  ivl := make_interval(secs => greatest(coalesce(g.interval_sec, s.interval_sec, 10), 2));\n  d := coalesce(g.drawn, '{}'::int[]);\n\n  if g.status = 'playing' then\n    if coalesce(g.draw_on, true) and (g.last_draw is null or now() >= g.last_draw + ivl) then\n      if coalesce(array_length(d, 1), 0) >= 75 then perform b13_finish(g.id); return 'finished'; end if;\n      loop n := 1 + floor(random() * 75)::int; exit when not (n = any(d)); end loop;\n      update games set drawn = array_append(d, n), last_draw = now() where id = g.id;\n      return 'drawn';\n    end if;\n    return 'wait';\n  elsif g.status = 'claiming' then\n    if now() >= coalesce(g.claim_end, now()) then perform b13_finish(g.id); return 'finished'; end if;\n    return 'claiming';\n  elsif g.status = 'finished' then\n    if coalesce(s.auto_on, false) and now() >= coalesce(g.finished_at, now()) + interval '60 seconds' then\n      insert into games (status, drawn, draw_on) values ('waiting', '{}', false) returning id into v_new;\n      perform b13_apply_next(v_new);\n      update cards set game_id = v_new where game_id is null;\n      return 'new_game';\n    end if;\n    return 'finished_wait';\n  else\n    update cards set game_id = g.id where game_id is null;\n    if not coalesce(s.auto_on, false) then return 'manual'; end if;\n    if g.start_at is null then perform b13_apply_next(g.id); return 'scheduled'; end if;\n    if now() >= g.start_at then\n      select count(*) into v_reg from cards where game_id = g.id and registered;\n      if v_reg > 0 then\n        update games set status = 'playing', drawn = '{}', draw_on = true, last_draw = now(),\n          claim_end = null, finished_at = null, code = substr(md5(random()::text), 1, 8) where id = g.id;\n        return 'started';\n      else\n        update games set start_at = now() + make_interval(mins => greatest(coalesce(s.gap_min, 10), 1)) where id = g.id;\n        return 'no_players';\n      end if;\n    end if;\n    return 'waiting';\n  end if;\nend; $$;\n\n-- 5) OTP (SMS via AfroMessage)\ncreate extension if not exists pg_net with schema extensions;\ncreate table if not exists otps (phone text primary key, code_hash text, purpose text, expires_at timestamptz, attempts int default 0, last_sent timestamptz default now());\ncreate table if not exists sms_config (id int primary key default 1, token text, sender text, identifier text, debug boolean default false);\ninsert into sms_config (id) values (1) on conflict do nothing;\nalter table otps enable row level security;        -- no policy => the browser key cannot read these\nalter table sms_config enable row level security;\n\ncreate or replace function send_otp(p_phone text, p_purpose text) returns json\nlanguage plpgsql security definer set search_path = public, extensions as $$\ndeclare c sms_config%rowtype; v_code text; u users%rowtype; o otps%rowtype;\nbegin\n  select * into u from users where phone = p_phone;\n  if not found then return json_build_object('ok', false, 'error', 'NO_USER'); end if;\n  if p_purpose = 'signup' and coalesce(u.verified, true) then return json_build_object('ok', false, 'error', 'ALREADY'); end if;\n  select * into o from otps where phone = p_phone;\n  if found and o.last_sent > now() - interval '60 seconds' then\n    return json_build_object('ok', false, 'error', 'WAIT', 'wait', ceil(extract(epoch from (o.last_sent + interval '60 seconds' - now())))::int);\n  end if;\n  v_code := lpad((floor(random() * 10000))::int::text, 4, '0');\n  insert into otps (phone, code_hash, purpose, expires_at, attempts, last_sent)\n    values (p_phone, md5(v_code || p_phone), p_purpose, now() + interval '5 minutes', 0, now())\n    on conflict (phone) do update set code_hash = excluded.code_hash, purpose = excluded.purpose,\n      expires_at = excluded.expires_at, attempts = 0, last_sent = now();\n  select * into c from sms_config where id = 1;\n  if coalesce(c.debug, false) then return json_build_object('ok', true, 'debug_code', v_code); end if;\n  if c.token is null then return json_build_object('ok', false, 'error', 'NO_SMS'); end if;\n  perform net.http_post(\n    url := 'https://api.afromessage.com/api/send',\n    headers := jsonb_build_object('Content-Type', 'application/json', 'Authorization', 'Bearer ' || c.token),\n    body := jsonb_strip_nulls(jsonb_build_object('from', c.identifier, 'sender', c.sender, 'to', p_phone,\n             'message', 'B13 Bingo: ' || v_code || ' is your verification code. Valid for 5 minutes.')));\n  return json_build_object('ok', true);\nend; $$;\n\ncreate or replace function verify_otp(p_phone text, p_code text, p_purpose text) returns json\nlanguage plpgsql security definer set search_path = public as $$\ndeclare o otps%rowtype;\nbegin\n  select * into o from otps where phone = p_phone and purpose = p_purpose for update;\n  if not found or o.expires_at < now() then return json_build_object('ok', false, 'error', 'EXPIRED'); end if;\n  if o.attempts >= 5 then return json_build_object('ok', false, 'error', 'LOCKED'); end if;\n  if o.code_hash <> md5(p_code || p_phone) then\n    update otps set attempts = attempts + 1 where phone = p_phone;\n    return json_build_object('ok', false, 'error', 'BAD_CODE');\n  end if;\n  update users set verified = true where phone = p_phone;\n  delete from otps where phone = p_phone;\n  return json_build_object('ok', true);\nend; $$;\n\ncreate or replace function reset_password(p_phone text, p_code text, p_salt text, p_hash text) returns json\nlanguage plpgsql security definer set search_path = public as $$\ndeclare o otps%rowtype;\nbegin\n  select * into o from otps where phone = p_phone and purpose = 'reset' for update;\n  if not found or o.expires_at < now() then return json_build_object('ok', false, 'error', 'EXPIRED'); end if;\n  if o.attempts >= 5 then return json_build_object('ok', false, 'error', 'LOCKED'); end if;\n  if o.code_hash <> md5(p_code || p_phone) then\n    update otps set attempts = attempts + 1 where phone = p_phone;\n    return json_build_object('ok', false, 'error', 'BAD_CODE');\n  end if;\n  update users set salt = p_salt, hash = p_hash, verified = true where phone = p_phone;\n  delete from otps where phone = p_phone;\n  return json_build_object('ok', true);\nend; $$;\n\ngrant execute on function auto_tick() to anon, authenticated;\ngrant execute on function b13_finish(bigint) to anon, authenticated;\ngrant execute on function b13_apply_next(bigint) to anon, authenticated;\ngrant execute on function send_otp(text, text) to anon, authenticated;\ngrant execute on function verify_otp(text, text, text) to anon, authenticated;\ngrant execute on function reset_password(text, text, text, text) to anon, authenticated;\n\n-- 6) SMS settings (fill in YOUR AfroMessage values, then run)\n-- update sms_config set token = 'YOUR_API_TOKEN', sender = 'YOUR_SENDER_NAME', identifier = 'YOUR_IDENTIFIER_ID' where id = 1;\n-- Testing without SMS (shows the code on screen — turn OFF for real use):\n-- update sms_config set debug = true where id = 1;\n\n-- 7) optional: run the engine 24/7 even when nobody has the app open\n-- create extension if not exists pg_cron;\n-- select cron.schedule('b13_auto_tick', '5 seconds', 'select auto_tick()');\n\n-- 8) IMPORTANT: refresh the API cache so the new columns/functions are visible\nnotify pgrst, 'reload schema';\n";
+let dbMiss = [], admTab = 'game';
+function renderDbWarn() {
+  const el = $('dbWarn'); if (!el) return;
+  el.classList.toggle('hidden', !dbMiss.length);
+  $('dbWarnList').textContent = dbMiss.length ? 'የጎደሉ ክፍሎች: ' + dbMiss.join(', ') : '';
+}
+async function dbCheck(manual) {
+  if (!isGA() && !isFA()) return;
+  const miss = [];
+  let r = await sb.from('settings').select('game_queue,queue_idx,auto_on,game_type,gap_min').limit(1); if (r.error) miss.push('settings');
+  r = await sb.from('games').select('start_at,paid,price,winner_pct,interval_sec').limit(1); if (r.error) miss.push('games');
+  r = await sb.from('users').select('verified').limit(1); if (r.error) miss.push('users.verified');
+  r = await sb.rpc('auto_tick'); if (r.error && isSchemaErr(r.error)) miss.push('auto_tick');
+  r = await sb.rpc('send_otp', { p_phone: '0000000000', p_purpose: 'check' }); if (r.error && isSchemaErr(r.error)) miss.push('send_otp');
+  dbMiss = miss; renderDbWarn();
+  if (manual && !miss.length) toast('ዳታቤዝ ተዘምኗል');
+}
+function copySql() {
+  const done = () => toast('SQL ተቀድቷል — በ Supabase SQL Editor ውስጥ paste ያድርጉ');
+  const fb = () => { const t = document.createElement('textarea'); t.value = SETUP_SQL; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); done(); } catch (e) { toast('ኮፒ አልተሳካም', 'e'); } t.remove(); };
+  if (navigator.clipboard) navigator.clipboard.writeText(SETUP_SQL).then(done).catch(fb); else fb();
+}
+function setAdmTab(t) { admTab = t; applyAdmTab(); if (t === 'fin') renderFin(true); }
+function applyAdmTab() {
+  const both = isGA() && isFA();
+  $('admTabs').classList.toggle('hidden', !both);
+  $('admGame').classList.toggle('hidden', !isGA() || (both && admTab !== 'game'));
+  $('admFin').classList.toggle('hidden', !isFA() || (both && admTab !== 'fin'));
+  document.querySelectorAll('[data-a]').forEach(b => b.classList.toggle('on', b.dataset.a === admTab));
+}
+const isSchemaErr = e => /schema cache|Could not find|does not exist|PGRST20|42703|42883/i.test(((e && e.message) || '') + ' ' + ((e && e.code) || ''));
+const dbMsg = e => isSchemaErr(e) ? 'ዳታቤዝ ገና አልተዘመነም — b13_setup_v8 SQL ን ያሂዱ' : 'ስህተት፦ ' + ((e && e.message) || '');
+const fmt = n => (Number(n)||0).toLocaleString();
+const letter = n => n<=15?'B':n<=30?'I':n<=45?'N':n<=60?'G':'O';
+const fdate = d => d ? new Date(d).toLocaleString('en-GB',{day:'2-digit',month:'short',year:'2-digit',hour:'2-digit',minute:'2-digit'}) : '—';
+const toast = (m,t) => {
+  const e = $('toast');
+  e.textContent = m;
+  e.className = 'fixed bottom-24 left-1/2 -translate-x-1/2 z-[100] px-4 py-2.5 rounded-xl text-sm font-bold shadow-2xl max-w-[90%] text-center ' + (t==='e'?'bg-red-500 text-white':t==='i'?'bg-amber-400 text-slate-900':'bg-emerald-500 text-white');
+  clearTimeout(window._t);
+  window._t = setTimeout(()=>e.classList.add('hidden'), 2800);
+};
+const openM = id => { $(id).classList.remove('hidden'); $(id).classList.add('flex'); };
+const closeM = id => { $(id).classList.add('hidden'); $(id).classList.remove('flex'); };
+const eye = (id,b) => { const e=$(id); e.type = e.type==='password'?'text':'password'; b.textContent = e.type==='password'?'👁':'🙈'; };
+
+let _ac = null, _lastB = 0;
+function ac() { try { _ac = _ac || new (window.AudioContext || window.webkitAudioContext)(); if (_ac.state === 'suspended') _ac.resume(); return _ac; } catch (e) { return null; } }
+['click','touchstart','keydown'].forEach(ev => document.addEventListener(ev, () => ac(), { passive: true }));
+function bell(freq, t0 = 0, dur = 0.9, vol = 0.16) {
+  const a = ac(); if (!a) return;
+  const t = a.currentTime + t0;
+  [[1, 1], [2.01, .35], [3.0, .15], [4.2, .06]].forEach(([m, v], k) => {
+    const o = a.createOscillator(), g = a.createGain(), end = t + dur / (1 + k * 0.7);
+    o.type = 'sine'; o.frequency.value = freq * m;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol * v, t + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, end);
+    o.connect(g); g.connect(a.destination); o.start(t); o.stop(end + 0.05);
+  });
+}
+function sndBall() {
+  if (!prefs.sound) return;
+  const last = (game?.drawn || []).at(-1) || 1;
+  const f = { B:523.25, I:587.33, N:659.25, G:783.99, O:880 }[letter(last)];
+  bell(f, 0, 0.9, 0.2); bell(f * 1.5, 0.12, 0.6, 0.08);
+}
+function sndNotify() { if (!prefs.sound) return; bell(880, 0, 0.6, 0.15); bell(1318.5, 0.14, 0.7, 0.12); }
+function sndBingo() {
+  if (!prefs.sound || Date.now() - _lastB < 6000) return;
+  _lastB = Date.now();
+  [523.25, 659.25, 783.99, 1046.5, 1318.5].forEach((f, i) => bell(f, i * 0.11, 0.9, 0.18));
+  [523.25, 659.25, 783.99, 1046.5].forEach(f => bell(f, 0.65, 1.4, 0.1));
+}
+function sndWrong() {
+  if (!prefs.sound) return;
+  const a = ac(); if (!a) return;
+  [[220, 0], [165, 0.18]].forEach(([f, t0]) => {
+    const o = a.createOscillator(), g = a.createGain(), t = a.currentTime + t0;
+    o.type = 'triangle'; o.frequency.value = f;
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.18, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.35);
+    o.connect(g); g.connect(a.destination); o.start(t); o.stop(t + 0.4);
+  });
+}
+function speakBall(n) {
+  if (!prefs.voice || !n || !('speechSynthesis' in window)) return;
+  try { const u = new SpeechSynthesisUtterance(letter(n) + ' ' + n); u.lang = 'en-US'; u.rate = 0.9; speechSynthesis.cancel(); speechSynthesis.speak(u); } catch (e) {}
+}
+function beep() { sndNotify(); }
+
+function withLoading(btn, fn) {
+  return async function(...args) {
+    if (btn.classList.contains('loading')) return;
+    btn.classList.add('loading'); btn.disabled = true;
+    try { await fn(...args); }
+    finally { btn.classList.remove('loading'); btn.disabled = false; }
+  };
+}
+
+// ===================== AUTH =====================
+const enc = new TextEncoder();
+const b64 = b => btoa(String.fromCharCode(...new Uint8Array(b)));
+const unb64 = t => Uint8Array.from(atob(t), c => c.charCodeAt(0));
+const newSalt = () => b64(crypto.getRandomValues(new Uint8Array(16)));
+async function hashPw(p, salt) {
+  const k = await crypto.subtle.importKey('raw', enc.encode(p), 'PBKDF2', false, ['deriveBits']);
+  return b64(await crypto.subtle.deriveBits({name:'PBKDF2', salt:unb64(salt), iterations:150000, hash:'SHA-256'}, k, 256));
+}
+let otpCtx = null, otpTick = null, otpLeft = 0;
+function authPanel(p) {
+  const ids = { l:'pLogin', s:'pSign', f:'pForgot', o:'pOtp' };
+  Object.keys(ids).forEach(k => $(ids[k]).classList.toggle('hidden', k !== p));
+  if (p !== 'o') clearInterval(otpTick);
+}
+const otpIn = () => [...document.querySelectorAll('#otpBox input')];
+const OTP_ERR = { NO_USER:'ይህ ስልክ አልተመዘገበም', NO_SMS:'የኤስኤምኤስ አገልግሎት አልተዋቀረም', ALREADY:'ተረጋግጧል' };
+async function startOtp(phone, purpose, payload) {
+  const { data, error } = await sb.rpc('send_otp', { p_phone: phone, p_purpose: purpose });
+  if (error) {
+    if (isSchemaErr(error) && purpose === 'signup') { toast('OTP ገና አልተዋቀረም — በቀጥታ ገብተዋል', 'i'); return loginAs(phone); }
+    return toast(dbMsg(error), 'e');
+  }
+  if (!data?.ok && data?.error !== 'WAIT') return toast(OTP_ERR[data?.error] || 'ስህተት ተፈጥሯል', 'e');
+  otpCtx = { phone, purpose, payload };
+  if (data.ok) toast(data.debug_code ? '🔧 የሙከራ ኮድ: ' + data.debug_code : '✓ ኮዱ ተልኳል', data.debug_code ? 'i' : '');
+  else toast(data.wait + ' ሰከንድ ይጠብቁ', 'i');
+  showOtp(120);
+}
+function showOtp(sec) {
+  authPanel('o');
+  $('otpSub').textContent = 'ኮዱ ወደ ' + otpCtx.phone + ' ተልኳል';
+  otpIn().forEach(i => i.value = '');
+  $('otpErr').classList.add('hidden'); chkOtp(); otpIn()[0].focus();
+  otpLeft = sec; clearInterval(otpTick); otpTick = setInterval(tickOtp, 1000); tickOtp();
+}
+function tickOtp() {
+  const t = $('otpTimer'), b = $('btnResend');
+  if (otpLeft > 0) {
+    t.textContent = 'ኮዱን እንደገና ለመላክ ' + String(Math.floor(otpLeft / 60)).padStart(2, '0') + ':' + String(otpLeft % 60).padStart(2, '0');
+    b.disabled = true; b.style.opacity = .4; otpLeft--;
+  } else { t.textContent = ''; b.disabled = false; b.style.opacity = 1; clearInterval(otpTick); }
+}
+function chkOtp() { const ok = otpIn().every(i => i.value); const b = $('btnOtp'); b.disabled = !ok; b.style.opacity = ok ? 1 : .5; }
+function resendOtp() { if (otpCtx) startOtp(otpCtx.phone, otpCtx.purpose, otpCtx.payload); }
+async function submitOtp() {
+  const code = otpIn().map(i => i.value).join(''), c = otpCtx;
+  if (code.length < 4 || !c) return;
+  const res = c.purpose === 'signup'
+    ? await sb.rpc('verify_otp', { p_phone: c.phone, p_code: code, p_purpose: 'signup' })
+    : await sb.rpc('reset_password', { p_phone: c.phone, p_code: code, p_salt: c.payload.salt, p_hash: c.payload.hash });
+  if (res.error) return err('otpErr', dbMsg(res.error));
+  const r = res.data;
+  if (!r?.ok) return err('otpErr', r?.error === 'EXPIRED' ? 'ኮዱ ጊዜው አልፎበታል — እንደገና ይላኩ' : r?.error === 'LOCKED' ? 'ብዙ ጊዜ ሞክረዋል — አዲስ ኮድ ይጠይቁ' : 'ኮዱ የተሳሳተ ነው');
+  toast('✓ ተረጋግጧል');
+  await loginAs(c.phone);
+}
+async function loginAs(phone) {
+  const { data: us } = await sb.from('users').select('*').eq('phone', phone).limit(1);
+  if (!us || !us.length) return;
+  const u = us[0];
+  if (!settings?.app_on && u.role !== 'OWNER') return err('otpErr', 'አፑ ለጊዜው ዝግ ነው!');
+  clearInterval(otpTick); cur = u; sessionStorage.setItem('b13_uid', u.id); enter();
+}
+async function forgotSubmit() {
+  $('fErr').classList.add('hidden');
+  const phone = $('fPhone').value.trim(), a = $('fPass').value, b = $('fPass2').value;
+  if (!/^09\d{8}$/.test(phone)) return err('fErr', 'ትክክለኛ ስልክ (09xxxxxxxx)');
+  if (a.length < 4) return err('fErr', 'የይለፍ ቃል ቢያንስ 4 ቁምፊ መሆን አለበት');
+  if (a !== b) return err('fErr', 'የይለፍ ቃሉ አይመሳሰልም');
+  const salt = newSalt(), hash = await hashPw(a, salt);
+  await startOtp(phone, 'reset', { salt, hash });
+}
+
+// ---- Ref number extraction (paste a whole SMS -> only the Ref stays) ----
+function extractRef(text) {
+  const t = String(text || '').trim();
+  if (!t) return '';
+  let m;
+  if ((m = t.match(/receipt\/([A-Z0-9]{8,20})/i))) return m[1].toUpperCase();
+  if ((m = t.match(/[?&]id=([A-Z0-9]{8,40})/i))) { const v = m[1].toUpperCase(); return /^FT/.test(v) ? v.slice(0, 12) : v; }
+  if ((m = t.match(/(?:transaction\s*(?:number|no\.?|id)|ref(?:erence)?\s*(?:number|no\.?|#)?|የግብይት\s*ቁጥር\S*)\s*(?:is|:|-|፦)?\s*((?=[A-Z0-9]*\d)[A-Z0-9]{8,20})/i))) return m[1].toUpperCase();
+  const toks = (t.match(/\b[A-Z0-9]{8,20}\b/gi) || []).filter(x => /\d/.test(x) && /[A-Z]/i.test(x));
+  if (toks.length) return toks[0].toUpperCase();
+  if (!/\s/.test(t) && t.length <= 30) return t.toUpperCase();
+  return '';
+}
+const err = (id, m) => { const e = $(id); e.textContent = m; e.classList.remove('hidden'); };
+
+async function login() {
+  $('lErr').classList.add('hidden');
+  const phone = $('lPhone').value.trim(), pw = $('lPass').value;
+  if (!phone || !pw) return err('lErr', 'ስልክ እና የይለፍ ቃል ያስገቡ');
+  const { data: users, error } = await sb.from('users').select('*').eq('phone', phone).limit(1);
+  if (error || !users || !users.length) return err('lErr', 'የተሳሳተ ስልክ ወይም የይለፍ ቃል');
+  const u = users[0];
+  if (!settings?.app_on && u.role !== 'OWNER') return err('lErr', 'አፑ ለጊዜው ዝግ ነው!');
+  if ((await hashPw(pw, u.salt)) !== u.hash) return err('lErr', 'የተሳሳተ ስልክ ወይም የይለፍ ቃል');
+  if (u.verified === false) { toast('ስልክዎ ገና አልተረጋገጠም — ኮድ ተልኳል', 'i'); return startOtp(phone, 'signup', null); }
+  cur = u;
+  sessionStorage.setItem('b13_uid', u.id);
+  enter();
+}
+
+async function signup() {
+  $('sErr').classList.add('hidden');
+  if (!settings?.app_on) return err('sErr', 'አፑ ለጊዜው ዝግ ነው');
+  const name = $('sName').value.trim(), phone = $('sPhone').value.trim(), a = $('sPass').value, b = $('sPass2').value;
+  if (!name) return err('sErr', 'ስም ያስገቡ');
+  if (!/^09\d{8}$/.test(phone)) return err('sErr', 'ትክክለኛ ስልክ (09xxxxxxxx)');
+  if (a.length < 4) return err('sErr', 'የይለፍ ቃል ቢያንስ 4 ቁምፊ መሆን አለበት');
+  if (a !== b) return err('sErr', 'የይለፍ ቃሉ አይመሳሰልም');
+  const { data: exists } = await sb.from('users').select('id').eq('phone', phone).limit(1);
+  if (exists && exists.length) return err('sErr', 'ስልኩ ቀድሞ ተመዝግቧል');
+  const salt = newSalt(), hash = await hashPw(a, salt);
+  let { error } = await sb.from('users').insert({ phone, name, salt, hash, role: 'USER', balance: 0, verified: false });
+  if (error && isSchemaErr(error)) ({ error } = await sb.from('users').insert({ phone, name, salt, hash, role: 'USER', balance: 0 }));
+  if (error) return err('sErr', 'ስህተት ተፈጥሯል');
+  $('lPhone').value = phone;
+  await startOtp(phone, 'signup', null);
+}
+
+async function setupOwner() {
+  $('oErr').classList.add('hidden');
+  const name = $('oName').value.trim(), phone = $('oPhone').value.trim(), a = $('oPass').value, b = $('oPass2').value;
+  if (!name) return err('oErr', 'ስም ያስገቡ');
+  if (!/^09\d{8}$/.test(phone)) return err('oErr', 'ትክክለኛ ስልክ (09xxxxxxxx)');
+  if (a.length < 4) return err('oErr', 'የይለፍ ቃል ቢያንስ 4 ቁምፊ መሆን አለበት');
+  if (a !== b) return err('oErr', 'የይለፍ ቃሉ አይመሳሰልም');
+  const { data: owners } = await sb.from('users').select('id').eq('role', 'OWNER').limit(1);
+  if (owners && owners.length) return closeM('mSetup');
+  const salt = newSalt(), hash = await hashPw(a, salt);
+  const { error } = await sb.from('users').insert({ phone, name, salt, hash, role: 'OWNER', balance: 0 });
+  if (error) return err('oErr', 'ስህተት ተፈጥሯል');
+  closeM('mSetup');
+  $('lPhone').value = phone;
+  toast('✓ የባለቤት መለያ ተፈጥሯል — ይግቡ');
+}
+
+// ===================== NAV =====================
+function go(p) {
+  page = p;
+  $('app').classList.toggle('bf', p === 'bingo' && prefs.scrollMode === 'cards');
+  ['bingo','wallet','admin','owner'].forEach(x => $('pg-'+x).classList.toggle('hidden', x !== p));
+  $('topWrap').classList.toggle('hidden', p !== 'bingo');
+  $('fabWrap').classList.toggle('hidden', p !== 'bingo');
+  if (p === 'admin') applyAdmTab();
+  render();
+}
+const openDrawer = () => { $('dBg').classList.remove('hidden'); $('drawer').classList.add('open'); };
+const closeDrawer = () => { $('dBg').classList.add('hidden'); $('drawer').classList.remove('open'); };
+function openWallet(m) {
+  closeDrawer();
+  go('wallet');
+  $('wDep').classList.toggle('hidden', m !== 'dep');
+  $('wWd').classList.toggle('hidden', m !== 'wd');
+  $('wTr').classList.toggle('hidden', m !== 'tr');
+  if (m === 'hist') $('myTx').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ===================== HELPERS =====================
+const isGA = () => cur && ['ADMIN_GAME','OWNER'].includes(cur.role);
+const isFA = () => cur && ['ADMIN_FINANCE','OWNER'].includes(cur.role);
+const gamePrice = () => Number(game?.price ?? settings?.price ?? 50);
+const nextPrice = () => { const q = settings?.game_queue; return (settings?.auto_on && Array.isArray(q) && q.length) ? Number(q[(settings.queue_idx || 0) % q.length].price) : Number(settings?.price ?? 50); };
+const canEdit = () => game && ['waiting','ready'].includes(game.status);
+const canReg = () => game && ['waiting','ready','preparing'].includes(game.status);
+const ROLE_LBL = { OWNER:'👑 ኦነር', ADMIN_GAME:'🎮 ጨዋታ አድሚን', ADMIN_FINANCE:'💰 ሒሳብ አድሚን', USER:'ተጫዋች' };
+const STAT_LBL = { waiting:'ቀጣይ ጨዋታ', ready:'ዝግጁ', preparing:'በዝግጅት', playing:'በጨዋታ ላይ', claiming:'ቢንጎ ተብሏል', finished:'ጨዋታ ተጠናቋል' };
+const TX_LBL = { DEPOSIT:['⬇ ዲፖዚት','text-emerald-400'], WITHDRAW:['⬆ ዊዝድሮው','text-amber-400'], TRANSFER_OUT:['⇄ ተላከ','text-red-400'], TRANSFER_IN:['⇄ ተቀበለ','text-emerald-400'], PRIZE:['🏆 ሽልማት','text-amber-400'] };
+
+function genGrid() {
+  const cols = [];
+  for (let c = 0; c < 5; c++) {
+    const a = [], min = c * 15 + 1;
+    while (a.length < 5) { const n = min + Math.floor(Math.random() * 15); if (!a.includes(n)) a.push(n); }
+    cols.push(a.sort((x,y)=>x-y));
+  }
+  const g = [];
+  for (let r = 0; r < 5; r++) for (let c = 0; c < 5; c++) g.push(cols[c][r]);
+  g[12] = 'F';
+  return g;
+}
+
+// ===================== CORE ACTIONS =====================
+async function buy(n) {
+  if (_buying) return;
+  _buying = true;
+  try {
+    fabOpen = false; $('fabMenu').classList.add('hidden');
+    const target = canEdit() ? game.id : null;   // ጨዋታ እየተካሄደ ከሆነ ካርቴላው ለቀጣይ ጨዋታ ይሆናል
+    const inBucket = myCards.filter(c => (c.game_id ?? null) === target).length;
+    if (inBucket + n > settings.max_cards) return toast('ከፍተኛው ' + settings.max_cards + ' ካርድ', 'e');
+    const price = target === null ? nextPrice() : gamePrice();
+    const cost = n * price;
+    if (cur.balance < cost) return toast('በቂ ቀሪ ሂሳብ የለዎትም', 'e');
+    const { error: e1 } = await sb.from('users').update({ balance: cur.balance - cost }).eq('id', cur.id);
+    if (e1) return toast('ስህተት', 'e');
+    const rows = [];
+    for (let i = 0; i < n; i++) rows.push({ user_id: cur.id, game_id: target, grid: genGrid(), marked: [], registered: false, locked: false, won: false, price });
+    const { error: e2 } = await sb.from('cards').insert(rows);
+    if (e2) { await sb.from('users').update({ balance: cur.balance }).eq('id', cur.id); return toast(isSchemaErr(e2) || e2.code === '23502' ? 'ዳታቤዝ ገና አልተዘመነም — b13_setup_v8 SQL ን ያሂዱ' : 'ስህተት', 'e'); }
+    cur.balance -= cost;
+    await refreshMyCards(); render();
+    toast(target === null ? n + ' ካርድ ለቀጣይ ጨዋታ ተገዝቷል — Register ማድረግ አይርሱ' : n + ' ካርድ ተገዝቷል — Register ማድረግ አይርሱ', 'i');
+  } finally { _buying = false; }
+}
+
+async function toggleReg(id) {
+  const c = myCards.find(x => x.id === id);
+  if (!c) return;
+  if (c.game_id && !canReg()) return toast('ጨዋታ በመካሄድ ላይ — ለቀጣይ ጨዋታ ካርቴላ ይግዙ', 'e');
+  const { error } = await sb.from('cards').update({ registered: !c.registered }).eq('id', id);
+  if (error) return toast('ስህተት', 'e');
+  await refreshMyCards(); render();
+}
+
+function toggleSelMode() {
+  selMode = !selMode; selected.clear();
+  $('selBar').classList.toggle('hidden', !selMode);
+  $('selCnt').textContent = 0;
+  go('bingo');
+}
+function toggleSel(id) {
+  if (!selMode) return;
+  selected.has(id) ? selected.delete(id) : selected.add(id);
+  $('selCnt').textContent = selected.size;
+  renderCards();
+}
+async function regAll(v) {
+  const ids = myCards.filter(c => !c.game_id || canReg()).map(c => c.id);
+  if (!ids.length) return toast('ምንም ካርቴላ የለም', 'i');
+  const { error } = await sb.from('cards').update({ registered: v }).in('id', ids);
+  if (error) return toast('ስህተት', 'e');
+  toast(v ? '✓ ሁሉም ተመዝግበዋል' : 'ምዝገባ ተሰርዟል');
+  await refreshMyCards(); render();
+}
+async function regSelected(v) {
+  if (!canReg() && myCards.some(c => selected.has(c.id) && c.game_id)) return toast('ጨዋታ በመካሄድ ላይ', 'e');
+  if (!selected.size) return toast('ካርቴላ ይምረጡ', 'i');
+  const { error } = await sb.from('cards').update({ registered: v }).in('id', [...selected]);
+  if (error) return toast('ስህተት', 'e');
+  toast(v ? '✓ ተመዝግበዋል' : 'ምዝገባ ተሰርዟል');
+  selected.clear(); $('selCnt').textContent = 0;
+  await refreshMyCards(); render();
+}
+
+async function toggleMark(id, v) {
+  if (!['playing','claiming'].includes(game.status)) return;
+  const c = myCards.find(x => x.id === id);
+  if (!c || c.locked || c.won || !c.game_id) return;
+  const adding = !(c.marked || []).includes(v);
+  if (adding && !(game.drawn || []).includes(v)) return toast('ቁጥሩ ገና አልወጣም', 'e');
+  const targets = prefs.markAll ? myCards.filter(x => x.game_id === game.id && x.registered && !x.locked && !x.won && (x.grid || []).includes(v)) : [c];
+  await Promise.all(targets.map(t => {
+    let m = [...(t.marked || [])];
+    m = adding ? (m.includes(v) ? m : [...m, v]) : m.filter(x => x !== v);
+    return sb.from('cards').update({ marked: m }).eq('id', t.id);
+  }));
+  await refreshMyCards(); renderCards();
+}
+
+async function resetMarks() {
+  const ids = myCards.filter(c => !c.locked && !c.won).map(c => c.id);
+  if (!ids.length) return toast('ምንም የለም', 'i');
+  await sb.from('cards').update({ marked: [] }).in('id', ids);
+  await refreshMyCards(); render(); closeM('mSet');
+  toast('✓ ምልክቶች ጠፍተዋል');
+}
+
+async function claim(id) {
+  if (!['playing','claiming'].includes(game.status)) return toast('ጨዋታ አልተጀመረም', 'e');
+  const c = myCards.find(x => x.id === id);
+  if (!c || !c.registered || c.locked || c.won || !c.game_id) return;
+  if (!checkBingo(c, game.type)) {
+    await sb.from('cards').update({ locked: true }).eq('id', id);
+    await refreshMyCards(); render();
+    sndWrong();
+    return toast('❌ ውሸት ቢንጎ! ካርድ ተቆልፏል', 'e');
+  }
+  await sb.from('cards').update({ won: true }).eq('id', id);
+  if (game.status === 'playing') {
+    await sb.from('games').update({ status: 'claiming', claim_end: new Date(Date.now() + 30000).toISOString() }).eq('id', game.id);
+  }
+  sndBingo();
+  toast('🏆 ቢንጎ! ሌሎች ለ30 ሰከንድ ቢንጎ ማለት ይችላሉ', 'i');
+}
+
+// ---- game types / patterns ----
+const GT = { line:'መስመር (1 Line)', two:'2 መስመር', four_free:'4 ፍሪ የማይነኩ መስመሮች', full:'ሙሉ ቤት (Full House)',
+  corners:'4 ጥግ (Four Corners)', x:'X ቅርጽ', z:'Z ቅርጽ', t:'T ቅርጽ', l:'L ቅርጽ', u:'U ቅርጽ', h:'H ቅርጽ', plus:'ፕላስ (+)',
+  frame:'ክፈፍ (Frame)', diamond:'አልማዝ (Diamond)', n:'N ቅርጽ', c:'C ቅርጽ', inner:'ውስጠኛ ካሬ', y:'Y ቅርጽ',
+  a:'A ቅርጽ', e:'E ቅርጽ', f:'F ቅርጽ', i:'I ቅርጽ', j:'J ቅርጽ', k:'K ቅርጽ', m:'M ቅርጽ', p:'P ቅርጽ', s:'S ቅርጽ', v:'V ቅርጽ', w:'W ቅርጽ',
+  heart:'ልብ (Heart)', hourglass:'የአሸዋ ሰዓት (Hourglass)', stamp:'ፖስታ ማህተም (Stamp)', stamps4:'4 ማህተሞች (4 Stamps)', star:'ኮከብ (Star)', checker:'ቼከር (Checker)',
+  b:'B ቅርጽ', d:'D ቅርጽ', g:'G ቅርጽ', r:'R ቅርጽ', q:'Q ቅርጽ',
+  bowtie:'የክራባት ቀስት (Bow tie)', kite:'ካይት (Kite)', arrowup:'ወደ ላይ ቀስት (Arrow up)', arrowright:'ወደ ቀኝ ቀስት (Arrow right)',
+  house:'ቤት (House)', tree:'ዛፍ (Tree)', umbrella:'ጃንጥላ (Umbrella)', hash:'ሃሽ (#)', window:'መስኮት (Window)', smallx:'ትንሽ X (Small X)',
+  cornersc:'4 ጥግ + መሃል', stairs:'ደረጃ (Stairs)', bolt:'መብረቅ (Bolt)' };
+const TYPE_ORDER = Object.keys(GT);
+const GT_DESC = {
+  line:'አንድ ሙሉ መስመር (አግድም፣ ቁልቁል ወይም ዲያጎናል) ሲሞላ ቢንጎ ነው። መሃል ያለው FREE ቦታ እንደ ተሞላ ይቆጠራል።',
+  two:'2 ሙሉ መስመሮች (በማናቸውም አቅጣጫ) ሲሞሉ ቢንጎ ነው። FREE ቦታ እንደ ተሞላ ይቆጠራል።',
+  four_free:'4 ሙሉ መስመሮች ሲሞሉ ቢንጎ ነው፤ ነገር ግን መስመሮቹ መሃል ያለውን FREE ቦታ መንካት (ማለፍ) የለባቸውም። 3ኛው ረድፍ፣ 3ኛው አምድ እና ሁለቱ ዲያጎናሎች አይቆጠሩም።',
+  full:'ሁሉም 25 ቦታዎች ሲሞሉ ቢንጎ ነው (ሙሉ ቤት)።'
+};
+const R_ = r => [0,1,2,3,4].map(c => r*5 + c), C_ = c => [0,1,2,3,4].map(r => r*5 + c);
+const D1 = [0,6,12,18,24], D2 = [4,8,12,16,20];
+const LINES = [0,1,2,3,4].map(r => R_(r)).concat([0,1,2,3,4].map(c => C_(c)), [D1, D2]);
+const FREE_OK = [0,1,3,4,5,6,8,9];   // free ሳይነኩ መስመሮች: ረድፍ 1,2,4,5 + አምድ 1,2,4,5
+const ALL25 = [...Array(25).keys()];
+const U = (...ls) => [].concat(...ls);
+// ቅርጽ (shape) ጨዋታዎች — በቅርጹ ያሉ ሁሉም ቦታዎች ሲሞሉ ቢንጎ
+const GP = {
+  corners:[0,4,20,24], x:U(D1,D2), z:U(R_(0),R_(4),D2), t:U(R_(0),C_(2)), l:U(C_(0),R_(4)),
+  u:U(C_(0),C_(4),R_(4)), h:U(C_(0),C_(4),R_(2)), plus:U(R_(2),C_(2)), frame:U(R_(0),R_(4),C_(0),C_(4)),
+  diamond:[2,6,8,10,12,14,16,18,22], n:U(C_(0),C_(4),D1), c:U(C_(0),R_(0),R_(4)),
+  inner:[6,7,8,11,12,13,16,17,18], y:[0,4,6,8,12,17,22],
+  a:U(C_(0),C_(4),R_(0),R_(2)), e:U(C_(0),R_(0),R_(2),R_(4)), f:U(C_(0),R_(0),R_(2)), i:U(R_(0),R_(4),C_(2)),
+  j:U(R_(0),C_(3),[20,21,22]), k:U(C_(0),[4,8,12,18,24]), m:U(C_(0),C_(4),[6,8,12]), p:U(C_(0),[1,2,3,4,9,14,13,12,11]),
+  s:U(R_(0),R_(2),R_(4),[5,10],[14,19]), v:[0,5,11,16,22,4,9,13,18], w:U(C_(0),C_(4),[16,12,18]),
+  heart:[1,3,5,6,7,8,9,10,11,12,13,14,16,17,18,22], hourglass:[0,1,2,3,4,6,7,8,12,16,17,18,20,21,22,23,24],
+  stamp:[0,1,5,6], stamps4:[0,1,5,6,3,4,8,9,15,16,20,21,18,19,23,24], star:U(D1,D2,R_(2),C_(2)),
+  checker:[0,2,4,6,8,10,12,14,16,18,20,22,24],
+  b:U(C_(0),[1,2,3],[9],[11,12,13],[19],[21,22,23]), d:U(C_(0),[1,2,3],[9,14,19],[21,22,23]),
+  g:U(R_(0),C_(0),R_(4),[14,19],[12,13]), r:U(C_(0),[1,2,3,4,9],[11,12,13,14],[18,24]), q:U(R_(0),R_(4),C_(0),C_(4),[18]),
+  bowtie:[0,5,10,15,20,4,9,14,19,24,6,16,8,18,12], kite:[2,6,8,10,12,14,16,18,22,17],
+  arrowup:[2,6,8,10,12,14,7,17,22], arrowright:U(R_(2),[2,8,18,22]),
+  house:[2,6,8,10,14,15,19,20,21,22,23,24], tree:[2,6,8,10,11,12,13,14,17,22],
+  umbrella:[1,2,3,5,6,7,8,9,12,17,22,21], hash:U(R_(1),R_(3),C_(1),C_(3)), window:U(R_(0),R_(4),C_(0),C_(4),R_(2),C_(2)),
+  smallx:[6,8,12,16,18], cornersc:[0,4,12,20,24], stairs:[0,1,6,7,12,13,18,19,24], bolt:[2,3,7,11,12,13,17,21]
+};
+const PATS = {
+  line:{ ok:[R_(0), C_(2), D1], bad:[[5,6,7,8],[0,6,12,18],[2,7,12,17]] },
+  two:{ ok:[U(R_(0),R_(4)), U(C_(0),D1), U(R_(2),C_(2))], bad:[R_(1), U(R_(0),[5,6,7,8]), U(D1,[1,2,3,4])] },
+  four_free:{ ok:[U(C_(1),C_(3),C_(4),R_(3)), U(R_(1),R_(3),C_(1),C_(4)), U(R_(0),R_(3),R_(4),C_(3))],
+              bad:[U(C_(1),C_(3),R_(2),R_(4)), U(R_(0),R_(4),C_(0),D1), U(R_(1),R_(3),C_(1),[4,9,14,19])] },
+  full:{ ok:[ALL25], bad:[ALL25.filter(i => i !== 24), ALL25.filter(i => i !== 0)] }
+};
+Object.keys(GP).forEach(k => {
+  const p = GP[k], nf = p.filter(i => i !== 12);
+  PATS[k] = { ok:[p], bad:[p.filter(i => i !== nf[0]), p.filter(i => i !== nf[nf.length - 1])] };
+  GT_DESC[k] = k === 'corners' ? 'የካርዱ 4ቱ ማዕዘን (ጥግ) ቦታዎች ሲሞሉ ቢንጎ ነው።'
+    : 'በታች በሚታየው "' + GT[k] + '" ቅርጽ ያሉ ሁሉም ቦታዎች ሲሞሉ ቢንጎ ነው። FREE ቦታ እንደ ተሞላ ይቆጠራል።';
+});
+
+function checkBingo(card, type) {
+  const grid = card.grid, marked = new Set(card.marked || []);
+  const isMarked = i => grid[i] === 'F' || marked.has(grid[i]);
+  if (GP[type]) return GP[type].every(isMarked);
+  if (type === 'full') return ALL25.every(isMarked);
+  const done = LINES.map((l, i) => l.every(isMarked) ? i : -1).filter(i => i >= 0);
+  if (type === 'two') return done.length >= 2;
+  if (type === 'four_free') return done.filter(i => FREE_OK.includes(i)).length >= 4;
+  return done.length >= 1;
+}
+
+// R-n : ለማሸነፍ የቀሩ (ገና ያልወጡ) ቁጥሮች ብዛት
+function remaining(card) {
+  const drawn = new Set(game?.drawn || []), g = card.grid || [];
+  const isD = i => g[i] === 'F' || drawn.has(g[i]);
+  const type = game?.type || 'line';
+  if (GP[type]) return GP[type].filter(i => !isD(i)).length;
+  if (type === 'full') return ALL25.filter(i => !isD(i)).length;
+  const miss = LINES.map(l => l.filter(i => !isD(i)));
+  const k = type === 'two' ? 2 : type === 'four_free' ? 4 : 1;
+  const pool = type === 'four_free' ? FREE_OK : LINES.map((_, i) => i);
+  let best = 99;
+  const rec = (st, left, set) => {
+    if (left === 0) { best = Math.min(best, set.size); return; }
+    for (let j = st; j < pool.length; j++) {
+      const nx = new Set(set); miss[pool[j]].forEach(x => nx.add(x));
+      if (nx.size < best) rec(j + 1, left - 1, nx);
+    }
+  };
+  rec(0, k, new Set());
+  return best;
+}
+
+function patMini(idx, on) {
+  const st = new Set(idx);
+  let g = '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:1px">';
+  for (let i = 0; i < 25; i++) g += `<div style="aspect-ratio:1;border-radius:2px;background:${st.has(i) ? (on || '#6366f1') : 'rgba(128,128,128,.25)'}"></div>`;
+  return g + '</div>';
+}
+
+function openHints(t) {
+  t = GT[t] ? t : 'line';
+  const box = (idx, ok) => {
+    const st = new Set(idx), col = ok ? '#2f6b33' : '#8d3328';
+    let g = '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:3px">';
+    for (let i = 0; i < 25; i++) g += `<div style="aspect-ratio:1;border-radius:4px;font-size:6px;display:flex;align-items:center;justify-content:center;color:#999;background:${st.has(i) ? col : 'rgba(128,128,128,.12)'};border:1px solid ${st.has(i) ? col : 'rgba(128,128,128,.28)'}">${i === 12 ? 'FREE' : ''}</div>`;
+    g += '</div>';
+    return `<div style="border:1px solid rgba(128,128,128,.28);border-radius:18px;padding:8px 8px 10px;background:rgba(128,128,128,.07)"><div class="text-center font-extrabold mb-2" style="font-size:13px;color:${ok ? '#3fa845' : '#d9473a'}">${ok ? 'ትክክለኛ ቢንጎ' : 'የተሳሳተ ቢንጎ'}</div>${g}</div>`;
+  };
+  $('hintBody').innerHTML = `<p class="text-[14px] leading-relaxed mb-1">ለዚህ ጨዋታ ትክክል የሆኑ ቢንጎ (አረንጓዴ) እና የተሳሳቱ (ቀይ) ናቸው "${GT[t]}"።</p>
+    <p class="text-[12px] text-slate-400 leading-relaxed mb-4">${GT_DESC[t]}</p>
+    <div class="grid grid-cols-3 gap-2">${PATS[t].ok.map(x => box(x, true)).join('')}${PATS[t].bad.map(x => box(x, false)).join('')}</div>`;
+  openM('mHints');
+}
+
+// ---- view any bingo / blocked card ----
+async function viewCard(id) {
+  const { data: c } = await sb.from('cards').select('*').eq('id', id).single();
+  if (!c) return toast('ካርቴላው አልተገኘም', 'e');
+  const { data: u } = await sb.from('users').select('phone').eq('id', c.user_id).single();
+  const ph = u?.phone ? u.phone.slice(0, 4) + '***' + u.phone.slice(-3) : '—';
+  const drawn = game?.drawn || [], marked = c.marked || [];
+  let last = null, li = -1;
+  marked.forEach(v => { const k = drawn.indexOf(v); if (k > li) { li = k; last = v; } });
+  const hd = c.won ? '#16a34a' : c.locked ? '#ef4444' : '#6d28d9';
+  const lt = ['#16a34a','#ef4444','#0d9488','#3b82f6','#f59e0b'];
+  const cells = (c.grid || []).map(v => {
+    if (v === 'F') return '<div style="aspect-ratio:1;border-radius:50%;background:#f59e0b;color:#fff;font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center">FREE</div>';
+    const m = marked.includes(v), l = v === last;
+    const bgc = l ? '#f59e0b' : m ? '#4caf50' : 'rgba(128,128,128,.25)';
+    return `<div style="aspect-ratio:1;border-radius:50%;background:${bgc};color:${m || l ? '#fff' : 'inherit'};font-weight:800;font-size:15px;display:flex;align-items:center;justify-content:center;${l ? 'outline:3px solid #ef4444' : ''}">${v}</div>`;
+  }).join('');
+  $('mCardBody').innerHTML = `<div style="background:${hd};color:#fff;padding:12px 16px">
+      <div class="font-extrabold text-lg">▭ ካርቴላ: ${c.id}</div>
+      <div class="text-sm">ስልክ: ${ph}</div>
+      ${last ? `<span class="chip" style="display:inline-block;margin-top:6px;background:#fbbf24;color:#111">የመጨረሻ ቁጥር: ${last}</span>` : ''}
+      <div class="text-xs mt-1">${c.won ? '🏆 ቢንጎ' : c.locked ? '⊘ የታሰረ (Blocked)' : ''}</div></div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;padding:8px 10px 0">${'BINGO'.split('').map((l, i) => `<div style="background:${lt[i]};color:#fff;font-weight:800;text-align:center;border-radius:8px;padding:4px 0">${l}</div>`).join('')}</div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding:10px">${cells}</div>`;
+  openM('mCard');
+}
+
+// ---- delete card (refund) ----
+function askDel(id) { delId = id; openM('mDel'); }
+async function doDel() {
+  closeM('mDel');
+  const c = myCards.find(x => x.id === delId);
+  if (!c) return;
+  if (c.game_id && !canEdit()) return toast('ጨዋታ በመካሄድ ላይ', 'e');
+  const { data: d, error } = await sb.from('cards').delete().eq('id', c.id).eq('user_id', cur.id).select();
+  if (error || !d || !d.length) return toast('ስህተት', 'e');
+  const refund = Number(c.price || settings?.price || 0);
+  await refreshUser();
+  await sb.from('users').update({ balance: Number(cur.balance) + refund }).eq('id', cur.id);
+  cur.balance = Number(cur.balance) + refund;
+  await refreshMyCards(); render();
+  toast('ካርቴላ ጠፍቷል — ' + fmt(refund) + ' ብር ተመልሷል', 'i');
+}
+
+// ===================== GAME CONTROL =====================
+async function prepare() {
+  if (!isGA() || !['waiting','ready'].includes(game.status)) return;
+  await sb.from('games').update({ status: 'preparing', ready_at: new Date(Date.now() + 10000).toISOString() }).eq('id', game.id);
+}
+async function newGame(startNow) {
+  if (!isGA()) return;
+  if (game && ['playing','claiming'].includes(game.status) && !confirm('አሁን ያለው ጨዋታ ይቋረጣል። አዲስ ልጀምር?')) return;
+  const ins = { status: 'waiting', type: settings?.game_type || game?.type || 'line', drawn: [], draw_on: false };
+  const { data: g, error } = await sb.from('games').insert(ins).select().single();
+  if (error || !g) return toast(dbMsg(error), 'e');
+  await sb.from('cards').update({ game_id: g.id }).is('game_id', null);
+  await loadGame(); await refreshMyCards(); await refreshGameCards();
+  if (settings?.auto_on) await sb.from('games').update({ start_at: null }).eq('id', g.id);
+  if (startNow) await startGame(); else toast('አዲስ ጨዋታ ተፈጥሯል');
+  render();
+}
+async function startGame() {
+  if (!isGA()) return;
+  if (game.status === 'finished') return newGame(true);
+  if (['playing','claiming'].includes(game.status)) return toast('ጨዋታ በመካሄድ ላይ', 'e');
+  await sb.from('games').update({
+    status: 'playing', drawn: [], draw_on: true, claim_end: null, finished_at: null,
+    last_draw: new Date().toISOString(), type: game.type || settings?.game_type || 'line',
+    code: Math.random().toString(16).slice(2, 10)
+  }).eq('id', game.id);
+  toast('🎲 ጨዋታ ተጀምሯል');
+}
+async function draw() {
+  if (!isGA() || game.status !== 'playing') return;
+  const drawn = [...(game.drawn || [])];
+  if (drawn.length >= 75) return;
+  let n;
+  do { n = 1 + Math.floor(Math.random() * 75); } while (drawn.includes(n));
+  drawn.push(n);
+  await sb.from('games').update({ drawn, last_draw: new Date().toISOString() }).eq('id', game.id);
+}
+async function resetGame() {
+  if (!isGA()) return;
+  if (!confirm('ጨዋታውን ዳግም ላስጀምር? የተገዙ ካርቴላዎች ይጠፋሉ (ገንዘብ አይመለስም)።')) return;
+  const gap = Math.max(1, +settings?.gap_min || 10);
+  const base = { status: 'waiting', drawn: [], draw_on: false, claim_end: null, finished_at: null };
+  let { error } = await sb.from('games').update({ ...base, paid: false, start_at: null, price: null, winner_pct: null, interval_sec: null }).eq('id', game.id);
+  if (error && isSchemaErr(error)) ({ error } = await sb.from('games').update(base).eq('id', game.id));
+  if (error) return toast(dbMsg(error), 'e');
+  await sb.from('cards').delete().eq('game_id', game.id);
+  await sb.from('cards').update({ game_id: game.id }).is('game_id', null);
+  toast('ጨዋታ ዳግም ተጀምሯል', 'i');
+}
+
+let queue = [], qEdit = -1, lastQSig = '';
+const QDEF = { type:'line', price:30, pct:70, int:10, wait:10 };
+function toggleAutoUI() { autoUI = !autoUI; cfgDirty = true; syncAutoBtn(); renderQueue(true); }
+function stp(id, d, mn, mx) { const e = $(id); e.value = Math.min(mx, Math.max(mn, (+e.value || 0) + d)); if (!id.startsWith('q')) cfgDirty = true; }
+function qTypeGridHtml(sel, fn) {
+  return TYPE_ORDER.map(k => `<button type="button" onclick="${fn}('${k}')" class="rounded-xl border p-1 text-center ${k === sel ? 'border-indigo-400 bg-indigo-500/20' : 'border-white/10'}">${patMini(PATS[k].ok[0], k === sel ? '#818cf8' : null)}<div class="text-[9px] font-bold mt-1 leading-tight">${GT[k]}</div></button>`).join('');
+}
+function pickQType(t) { $('qType').value = t; $('qTypeDesc').textContent = GT_DESC[t] || ''; $('qTypeGrid').innerHTML = qTypeGridHtml(t, 'pickQType'); }
+function editQ(i) {
+  qEdit = i;
+  const it = i >= 0 ? queue[i] : { ...(queue[queue.length - 1] || QDEF) };
+  $('qPrice').value = it.price; $('qPct').value = it.pct; $('qInt').value = it.int; $('qWait').value = it.wait;
+  pickQType(it.type);
+  $('qDelBtn').classList.toggle('hidden', i < 0);
+  openM('mQ');
+}
+function saveQ() {
+  const it = { type: $('qType').value, price: +$('qPrice').value, pct: +$('qPct').value, int: +$('qInt').value, wait: +$('qWait').value };
+  if (!(it.price >= 1) || !(it.pct >= 1 && it.pct <= 100) || !(it.int >= 2 && it.int <= 60) || !(it.wait >= 1 && it.wait <= 240)) return toast('እሴቶቹን ያረጋግጡ', 'e');
+  if (qEdit >= 0) queue[qEdit] = it; else queue.push(it);
+  cfgDirty = true; closeM('mQ'); renderQueue(true);
+}
+function mvQ(i, d) { const j = i + d; if (j < 0 || j >= queue.length) return; [queue[i], queue[j]] = [queue[j], queue[i]]; cfgDirty = true; renderQueue(true); }
+function dupQ(i) { queue.splice(i + 1, 0, { ...queue[i] }); cfgDirty = true; renderQueue(true); }
+function delQ(i) { if (i < 0) return; queue.splice(i, 1); cfgDirty = true; renderQueue(true); }
+function addQ10() { const b = queue[queue.length - 1] || QDEF; for (let k = 0; k < 10; k++) queue.push({ ...b }); cfgDirty = true; renderQueue(true); }
+function clearQ() { if (!queue.length || !confirm('ሁሉንም ጨዋታዎች ከዝርዝሩ ላጥፋ?')) return; queue = []; cfgDirty = true; renderQueue(true); }
+function renderQueue(force) {
+  const el = $('qList'); if (!el) return;
+  const n = queue.length, idx = Number(settings?.queue_idx || 0), auto = !!settings?.auto_on;
+  const sig = JSON.stringify([queue, idx, auto, game?.status, autoUI]);
+  if (!force && sig === lastQSig) return;
+  lastQSig = sig;
+  const nowI = n ? (((idx - 1) % n) + n) % n : -1, nextI = n ? idx % n : -1;
+  $('qCount').textContent = n;
+  el.innerHTML = n ? queue.map((it, i) => {
+    const cur_ = auto && i === nowI && game && game.status !== 'finished';
+    const badge = cur_ ? '<span class="chip !py-0 !px-2" style="background:#16a34a;font-size:10px">▶ አሁን</span>' : (auto && i === nextI) ? '<span class="chip !py-0 !px-2" style="background:#2563eb;font-size:10px">⏭ ቀጣይ</span>' : '';
+    return `<div class="rounded-2xl border ${cur_ ? 'border-emerald-400' : 'border-white/10'} bg-white/5 p-2 flex items-center gap-2">
+      <div class="w-7 h-7 shrink-0 rounded-full bg-indigo-500 text-white text-xs font-bold flex items-center justify-center">${i + 1}</div>
+      <div class="w-11 shrink-0">${patMini(PATS[it.type] ? PATS[it.type].ok[0] : [])}</div>
+      <button class="flex-1 min-w-0 text-left" onclick="editQ(${i})"><div class="font-bold text-[13px] truncate">${GT[it.type] || it.type}</div><div class="text-[10px] text-slate-400">${it.price} ብር · ${it.pct}% · ${it.int} ሰከንድ · ${it.wait} ደቂቃ</div>${badge}</button>
+      <div class="flex flex-col"><button onclick="mvQ(${i},-1)" class="px-2 leading-none">▲</button><button onclick="mvQ(${i},1)" class="px-2 leading-none">▼</button></div>
+      <button onclick="dupQ(${i})" class="px-1">⧉</button><button onclick="delQ(${i})" class="px-1">🗑</button></div>`;
+  }).join('') : '<p class="text-center text-slate-400 text-xs py-4">ዝርዝሩ ባዶ ነው — ጨዋታ ይጨምሩ</p>';
+}
+function syncAutoBtn() {
+  const b = $('btnAutoBig'); if (!b) return;
+  b.textContent = autoUI ? '⏹ አቁም' : '▶ ራስ-ሰር ጀምር';
+  b.style.background = autoUI ? '#fecaca' : '#fff'; b.style.color = autoUI ? '#b91c1c' : '#4f46e5';
+}
+async function toggleAutoNow() {
+  autoUI = !autoUI; cfgDirty = true; syncAutoBtn();
+  await applyCfg();
+  if (!!settings?.auto_on !== autoUI) { autoUI = !!settings?.auto_on; syncAutoBtn(); }
+}
+function updAdminLive(reg, pool, prize) {
+  const el = $('aLive'); if (!el) return;
+  const st = (ic, bg, a, b) => `<div class="stat"><span class="ic" style="background:${bg}">${ic}</span><div class="min-w-0"><div class="text-[10px] text-slate-400">${a}</div><b class="text-[15px] block truncate">${b}</b></div></div>`;
+  el.innerHTML = st('🎴', 'rgba(99,102,241,.25)', 'ካርቴላ', reg.length) + st('👥', 'rgba(14,165,233,.25)', 'ተጫዋቾች', new Set(reg.map(c => c.user_id)).size) +
+    st('💰', 'rgba(245,158,11,.25)', 'ጠቅላላ', fmt(pool)) + st('🏆', 'rgba(16,185,129,.25)', 'ሽልማት', fmt(prize)) +
+    st('🏠', 'rgba(236,72,153,.25)', 'ትርፍ', fmt(pool - prize)) + st('⏱', 'rgba(148,163,184,.25)', 'የኳስ ጥሪ', (game?.interval_sec ?? settings?.interval_sec ?? 10) + ' ሰ');
+  const d = game?.drawn || [];
+  $('aBallTxt').textContent = d.length + '/75'; $('aBallBar').style.width = (d.length / 75 * 100) + '%';
+  $('aBalls').innerHTML = d.slice(-10).reverse().map(n => `<span class="ball ${letter(n)}" style="width:36px;height:36px;font-size:11px;flex:none">${letter(n)}${n}</span>`).join('');
+  $('aBanType').textContent = GT[game?.type] || GT.line;
+  $('aBanStat').textContent = STAT_LBL[game?.status] || '—';
+  syncAutoBtn();
+}
+
+async function applyCfg() {
+  if (!isGA()) return;
+  const max = +$('cfgMax').value;
+  if (!(max >= 1)) return toast('እሴቶቹን ያረጋግጡ', 'e');
+  if (autoUI && !queue.length) return toast('ዝርዝሩ ባዶ ነው — ቢያንስ አንድ ጨዋታ ይጨምሩ', 'e');
+  const f = queue[0];
+  const changed = JSON.stringify(queue) !== JSON.stringify(settings?.game_queue || []) || (autoUI && !settings?.auto_on);
+  const upd = { max_cards: max, auto_on: autoUI, game_queue: queue };
+  if (changed) upd.queue_idx = 0;
+  if (f) Object.assign(upd, { game_type: f.type, price: f.price, winner_pct: f.pct, interval_sec: f.int, gap_min: f.wait });
+  let { error } = await sb.from('settings').update(upd).eq('id', 1);
+  let partial = false;
+  if (error && isSchemaErr(error)) {
+    const legacy = { max_cards: max };
+    if (f) Object.assign(legacy, { price: f.price, winner_pct: f.pct, interval_sec: f.int });
+    ({ error } = await sb.from('settings').update(legacy).eq('id', 1));
+    partial = !error;
+  }
+  if (error) return toast(dbMsg(error), 'e');
+  if (partial) { cfgDirty = false; await loadSettings(); render(); return toast('ዝርዝሩ አልተቀመጠም — ዳታቤዝ ገና አልተዘመነም (SQL ያሂዱ)', 'e'); }
+  if (changed && autoUI && game && ['waiting','ready','preparing'].includes(game.status)) await sb.from('games').update({ start_at: null }).eq('id', game.id);
+  cfgDirty = false;
+  await loadSettings(); await loadGame(); render();
+  toast('✓ ተቀምጧል' + (autoUI ? ' — ራስ-ሰር ጨዋታ በርቷል' : ''));
+}
+
+// ===================== FINANCE (user) =====================
+async function deposit() {
+  const amt = parseFloat($('dAmt').value), ref = extractRef($('dRef').value) || ($('dRef').value || '').trim().toUpperCase();
+  if (!(amt >= 50)) return toast('ቢያንስ 50 ብር', 'e');
+  if (!ref) return toast('Txn ቁጥር ያስገቡ', 'e');
+  const { error } = await sb.from('transactions').insert({ user_id: cur.id, type: 'DEPOSIT', amount: amt, method: $('dMethod').value, ref, status: 'PENDING' });
+  if (error) return toast('ስህተት', 'e');
+  $('dAmt').value = $('dRef').value = '';
+  toast('ጥያቄ ተልኳል — አድሚን ያረጋግጣል', 'i');
+  renderMyTx();
+}
+
+async function withdraw() {
+  const amt = parseFloat($('wAmt').value), acc = $('wAcc').value.trim();
+  if (!(amt >= 100)) return toast('ቢያንስ 100 ብር', 'e');
+  if (amt > cur.balance) return toast('በቂ ቀሪ ሂሳብ የለዎትም', 'e');
+  if (!acc) return toast('ስልክ ያስገቡ', 'e');
+  await sb.from('users').update({ balance: cur.balance - amt }).eq('id', cur.id);
+  await sb.from('transactions').insert({ user_id: cur.id, type: 'WITHDRAW', amount: amt, method: $('wMethod').value, ref: acc, status: 'PENDING' });
+  cur.balance -= amt;
+  $('wAmt').value = $('wAcc').value = '';
+  toast('ጥያቄ ተልኳል', 'i');
+  render();
+}
+
+// ---- user → user transfer (atomic, via Supabase RPC: transfer_money) ----
+async function transfer() {
+  const phone = $('trPhone').value.trim(), amt = Math.floor(parseFloat($('trAmt').value));
+  if (!/^09\d{8}$/.test(phone)) return toast('ትክክለኛ ስልክ (09xxxxxxxx)', 'e');
+  if (!(amt >= 10)) return toast('ቢያንስ 10 ብር', 'e');
+  if (phone === cur.phone) return toast('ለራስዎ መላክ አይቻልም', 'e');
+
+  const { data: rs } = await sb.from('users').select('name,phone').eq('phone', phone).limit(1);
+  if (!rs || !rs.length) return toast('ይህ ስልክ ያለው ተጠቃሚ አልተገኘም', 'e');
+  if (!confirm(fmt(amt) + ' ብር ወደ ' + rs[0].name + ' (' + rs[0].phone + ') ይላክ?')) return;
+
+  const { error } = await sb.rpc('transfer_money', { p_from: cur.id, p_to_phone: phone, p_amount: amt });
+  if (error) {
+    const m = error.message || '';
+    return toast(
+      m.includes('INSUFFICIENT') ? 'በቂ ቀሪ ሂሳብ የለዎትም' :
+      m.includes('NO_RECEIVER') ? 'ይህ ስልክ ያለው ተጠቃሚ አልተገኘም' :
+      m.includes('SELF') ? 'ለራስዎ መላክ አይቻልም' :
+      m.includes('MIN_AMOUNT') ? 'ቢያንስ 10 ብር' : 'ስህተት — እንደገና ይሞክሩ', 'e');
+  }
+  await refreshUser();
+  $('trPhone').value = $('trAmt').value = '';
+  toast('✓ ' + fmt(amt) + ' ብር ወደ ' + rs[0].name + ' ተልኳል');
+  render();
+}
+
+// ===================== FINANCE (admin) =====================
+async function approve(id) {
+  if (!isFA()) return;
+  const { data: upd, error } = await sb.from('transactions').update({ status: 'APPROVED', processed_at: new Date().toISOString(), approved_by: cur.id }).eq('id', id).eq('status', 'PENDING').select();
+  if (error) return toast(dbMsg(error), 'e');
+  if (!upd || !upd.length) { toast('ጥያቄው ቀድሞ ተሰርቷል', 'i'); return renderFin(true); }
+  const tx = upd[0];
+  if (tx.type === 'DEPOSIT') {
+    const { data: u } = await sb.from('users').select('balance').eq('id', tx.user_id).single();
+    const { error: e2 } = await sb.from('users').update({ balance: Number(u?.balance || 0) + Number(tx.amount) }).eq('id', tx.user_id);
+    if (e2) {
+      await sb.from('transactions').update({ status: 'PENDING', processed_at: null, approved_by: null }).eq('id', id);
+      return toast('ስህተት — ሒሳብ መጨመር አልተቻለም', 'e');
+    }
+  }
+  toast('✓ ተፈቅዷል');
+  renderFin(true);
+}
+
+async function reject(id) {
+  if (!isFA()) return;
+  const { data: upd, error } = await sb.from('transactions').update({ status: 'REJECTED', processed_at: new Date().toISOString(), approved_by: cur.id }).eq('id', id).eq('status', 'PENDING').select();
+  if (error) return toast(dbMsg(error), 'e');
+  if (!upd || !upd.length) { toast('ጥያቄው ቀድሞ ተሰርቷል', 'i'); return renderFin(true); }
+  const tx = upd[0];
+  if (tx.type === 'WITHDRAW') {
+    const { data: u } = await sb.from('users').select('balance').eq('id', tx.user_id).single();
+    await sb.from('users').update({ balance: Number(u?.balance || 0) + Number(tx.amount) }).eq('id', tx.user_id);
+  }
+  toast('ተሰርዟል', 'e');
+  renderFin(true);
+}
+
+// undo an already processed request -> back to PENDING (balance effect reversed)
+async function undoTx(id) {
+  if (!isFA()) return;
+  const { data: tx } = await sb.from('transactions').select('*').eq('id', id).single();
+  if (!tx || tx.status === 'PENDING') return renderFin(true);
+  if (!confirm('ይህን ውሳኔ ልሻር? ጥያቄው ወደ "በመጠበቅ" ይመለሳል።')) return;
+  const { data: u } = await sb.from('users').select('balance').eq('id', tx.user_id).single();
+  const bal = Number(u?.balance || 0), amt = Number(tx.amount);
+  if (tx.type === 'DEPOSIT' && tx.status === 'APPROVED') {
+    if (bal < amt) return toast('የተጠቃሚው ቀሪ ሂሳብ ከዲፖዚቱ ያንሳል — መሻር አይቻልም', 'e');
+    await sb.from('users').update({ balance: bal - amt }).eq('id', tx.user_id);
+  } else if (tx.type === 'WITHDRAW' && tx.status === 'REJECTED') {
+    if (bal < amt) return toast('የተጠቃሚው ቀሪ ሂሳብ በቂ አይደለም — መሻር አይቻልም', 'e');
+    await sb.from('users').update({ balance: bal - amt }).eq('id', tx.user_id);
+  }
+  await sb.from('transactions').update({ status: 'PENDING', processed_at: null, approved_by: null }).eq('id', id);
+  toast('↩ ተሽሯል', 'i');
+  renderFin(true);
+}
+
+function setFTab(t) {
+  fTab = t;
+  document.querySelectorAll('[data-f]').forEach(b => b.classList.toggle('on', b.dataset.f === t));
+  renderFin(true);
+}
+
+// ===================== OWNER =====================
+async function toggleSafe() {
+  if (cur.role !== 'OWNER') return;
+  const newVal = !settings.app_on;
+  await sb.from('settings').update({ app_on: newVal }).eq('id', 1);
+  toast(newVal ? '🟢 አፕ በርቷል' : '🔴 አፕ ጠፍቷል', newVal ? '' : 'e');
+}
+
+async function addAdmin() {
+  if (cur.role !== 'OWNER') return;
+  $('aErr').classList.add('hidden');
+  const role = $('aRole').value, name = $('aName').value.trim(), phone = $('aPhone').value.trim(), pw = $('aPass').value;
+  if (!name) return err('aErr', 'ስም ያስገቡ');
+  if (!/^09\d{8}$/.test(phone)) return err('aErr', 'ትክክለኛ ስልክ (09xxxxxxxx)');
+  if (pw.length < 4) return err('aErr', 'የይለፍ ቃል ቢያንስ 4 ቁምፊ');
+  const { data: ex } = await sb.from('users').select('id, role').eq('phone', phone).limit(1);
+  const salt = newSalt(), hash = await hashPw(pw, salt);
+  if (ex && ex.length) {
+    if (ex[0].role === 'OWNER') return err('aErr', 'ይህ ስልክ የኦነር ነው');
+    if (!confirm('ይህ ስልክ ቀድሞ ተመዝግቧል። ወደ አድሚን ልቀይረው? (የይለፍ ቃል ይቀየራል)')) return;
+    const { error } = await sb.from('users').update({ role, name, salt, hash }).eq('id', ex[0].id);
+    if (error) return err('aErr', 'ስህተት ተፈጥሯል');
+  } else {
+    const { error } = await sb.from('users').insert({ phone, name, salt, hash, role, balance: 0 });
+    if (error) return err('aErr', 'ስህተት ተፈጥሯል');
+  }
+  $('aName').value = $('aPhone').value = $('aPass').value = '';
+  toast('✓ አድሚን ተፈጥሯል');
+  renderOwner(true);
+}
+
+async function removeAdmin(id) {
+  if (cur.role !== 'OWNER' || !confirm('ይህን አድሚን ወደ ተጫዋችነት ልመልሰው?')) return;
+  await sb.from('users').update({ role: 'USER' }).eq('id', id);
+  toast('ተመልሷል', 'i');
+  renderOwner(true);
+}
+
+function oTab(t) {
+  oTabNow = t;
+  document.querySelectorAll('.otab[data-t]').forEach(b => b.classList.toggle('on', b.dataset.t === t));
+  ['fin','hist','staff','users','safe'].forEach(x => $('ot-' + x).classList.toggle('hidden', x !== t));
+  renderOwner(true);
+}
+
+// ===================== DATA LOADERS =====================
+async function loadSettings() {
+  const { data } = await sb.from('settings').select('*').eq('id', 1).single();
+  settings = data || { price: 50, interval_sec: 6, max_cards: 30, winner_pct: 70, app_on: true };
+}
+async function loadGame() {
+  let { data } = await sb.from('games').select('*').order('id', { ascending: false }).limit(1);
+  if (!data || !data.length) {
+    const { data: g } = await sb.from('games').insert({ status: 'waiting', type: 'line' }).select().single();
+    game = g;
+  } else game = data[0];
+}
+async function syncGame(full = true) {
+  if (syncing) { syncAgain = true; return; }
+  syncing = true;
+  try {
+    const prev = game, prevSt = game?.status, prevLen = (game?.drawn || []).length;
+    await loadGame();
+    const same = prev && prev.id === game.id;
+    if (prev && !same) { selected.clear(); await refreshMyCards(); }
+    if (same && (game.drawn || []).length > prevLen) { sndBall(); speakBall((game.drawn || []).at(-1)); }
+    if (same && prevSt !== game.status) {
+      if (game.status === 'claiming') sndBingo();
+      if (game.status === 'playing' && prefs.gs !== 'off' && (prefs.gs === 'always' || myCards.some(c => c.registered)))
+        notifyUser('🎲 ጨዋታ ተጀምሯል!');
+      if (game.status === 'waiting' && prefs.notify)
+        notifyUser('🔔 አዲስ ጨዋታ ተፈጥሯል!');
+    }
+    if (prev && !same && prefs.notify) notifyUser('🔔 አዲስ ጨዋታ ተፈጥሯል!');
+    if (full || !same || prevSt !== game.status || (game.drawn || []).length !== prevLen) await refreshGameCards();
+    if (prefs.autoMark) await autoMarkNow();
+    render();
+  } finally {
+    syncing = false;
+    if (syncAgain) { syncAgain = false; syncGame(true); }
+  }
+}
+
+function updCountdown0() {
+  if (!game) return;
+  const el = $('nextMsg'), wait = ['waiting','ready','preparing'].includes(game.status);
+  if (wait && game.start_at && settings?.auto_on) {
+    const sec = Math.max(0, Math.ceil((new Date(game.start_at) - Date.now()) / 1000));
+    el.textContent = sec > 0 ? '⏳ ጨዋታው ለመጀመር የቀረ: ' + String(Math.floor(sec / 60)).padStart(2, '0') + ':' + String(sec % 60).padStart(2, '0') + ' — ካርቴላ ገዝተው Register ያድርጉ' : '⏳ ጨዋታ በመጀመር ላይ…';
+    el.classList.remove('hidden');
+  } else if (game.status === 'finished' && settings?.auto_on) {
+    el.textContent = '🔁 ቀጣይ ጨዋታ በቅርቡ ይዘጋጃል…'; el.classList.remove('hidden');
+  } else el.classList.add('hidden');
+  if (game.status === 'claiming' && game.claim_end) {
+    const left = Math.max(0, Math.ceil((new Date(game.claim_end) - Date.now()) / 1000));
+    $('claimMsg').textContent = '🏆 ቢንጎ ተብሏል! ሌሎች ቢንጎ ለማለት ቀሪ ሰከንድ: ' + left;
+  }
+}
+
+async function autoMarkNow() {
+  if (!prefs.autoMark || !game || !['playing','claiming'].includes(game.status)) return;
+  const drawn = new Set(game.drawn || []);
+  const jobs = myCards.filter(c => c.game_id === game.id && c.registered && !c.locked && !c.won).map(c => {
+    const have = new Set(c.marked || []);
+    const add = (c.grid || []).filter(v => v !== 'F' && drawn.has(v) && !have.has(v));
+    return add.length ? sb.from('cards').update({ marked: [...have, ...add] }).eq('id', c.id) : null;
+  }).filter(Boolean);
+  if (!jobs.length) return;
+  await Promise.all(jobs);
+  await refreshMyCards();
+}
+
+function updCountdown() {
+  updCountdown0();
+  const el = $('aNext');
+  if (!el || !game || !isGA()) return;
+  const wait = ['waiting','ready','preparing'].includes(game.status);
+  let txt = '';
+  if (wait && game.start_at && settings?.auto_on) {
+    const sec = Math.max(0, Math.ceil((new Date(game.start_at) - Date.now()) / 1000));
+    txt = (sec === 0 && !gameCards.some(c => c.registered)) ? '⚠ ማንም አልተመዘገበም — ተጫዋች እስኪመዘገብ ይጠብቃል' : '⏳ ቀጣይ ጨዋታ በ ' + new Date(game.start_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) + ' — ' + String(Math.floor(sec / 60)).padStart(2, '0') + ':' + String(sec % 60).padStart(2, '0') + ' ይቀራል';
+  } else if (game.status === 'playing') txt = '🎲 ኳስ እየተጠራ ነው — በየ ' + (settings?.interval_sec || 10) + ' ሰከንድ';
+  else if (game.status === 'claiming') txt = '🏆 ቢንጎ ተብሏል — ሌሎች እየተጠባበቁ ነው';
+  else if (game.status === 'finished') txt = '🏁 ጨዋታ ተጠናቋል' + (settings?.auto_on ? ' — ቀጣይ በቅርቡ ይፈጠራል' : '');
+  el.textContent = txt; el.classList.toggle('hidden', !txt);
+}
+
+async function refreshMyCards() {
+  if (!cur) return;
+  if (!game) { myCards = []; return; }
+  const { data } = await sb.from('cards').select('*').eq('user_id', cur.id).or('game_id.eq.' + game.id + ',game_id.is.null').order('id', { ascending: false });
+  myCards = data || [];
+}
+async function refreshGameCards() {
+  if (!game) return;
+  const { data } = await sb.from('cards').select('id,user_id,registered,won,locked,price').eq('game_id', game.id);
+  gameCards = data || [];
+}
+async function refreshUser() {
+  if (!cur) return;
+  const { data } = await sb.from('users').select('*').eq('id', cur.id).single();
+  if (data) cur = data;
+}
+
+// ===================== RENDER =====================
+function chips(list, cls, pre = '') {
+  return list.length ? list.map(c => `<button onclick="viewCard(${c.id})" class="chip ${cls}">${pre}${c.id}</button>`).join('') : '<span class="text-slate-500">—</span>';
+}
+
+function render() {
+  if (!cur) return;
+  $('dBal').textContent = fmt(cur.balance) + ' ብር';
+  $('hBal').textContent = fmt(cur.balance) + ' ብር';
+  $('dName').textContent = cur.name;
+  $('dPhone').textContent = cur.phone;
+  $('fabHint').textContent = fmt(canEdit() ? gamePrice() : nextPrice()) + ' ብር/ካርድ';
+
+  const drawn = game?.drawn || [];
+  $('tCount').textContent = drawn.length;
+  const last = drawn.at(-1), b = $('tBall');
+  if (last) { b.className = 'ball ' + letter(last); b.textContent = letter(last) + '-' + last; b.style.display = ''; }
+  else b.style.display = 'none';
+
+  const reg = gameCards.filter(c => c.registered);
+  const pool = reg.reduce((a, c) => a + Number(c.price || gamePrice()), 0);
+  const prize = Math.floor(pool * Number(game?.winner_pct ?? settings?.winner_pct ?? 70) / 100);
+  $('giCode').textContent = game?.code || '—';
+  const _t = ['waiting','ready','preparing'].includes(game?.status) ? game?.start_at : game?.last_draw;
+  $('giTime').textContent = _t ? new Date(_t).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : '—';
+  $('giStatus').textContent = STAT_LBL[game?.status] || '—';
+  $('giStatus').className = ['waiting','ready','preparing'].includes(game?.status) ? 'text-blue-400' : ['playing','claiming'].includes(game?.status) ? 'text-emerald-400' : 'text-slate-400';
+  $('giType').textContent = GT[game?.type] || GT.line;
+  $('giPrice').textContent = '$' + fmt(gamePrice());
+  $('giPlayers').textContent = new Set(reg.map(c => c.user_id)).size;
+  $('giPrize').textContent = '$' + fmt(prize);
+  if (isGA()) updAdminLive(reg, pool, prize);
+  $('tBingo').innerHTML = chips(gameCards.filter(c => c.won), 'gr');
+  $('tBlock').innerHTML = chips(gameCards.filter(c => c.locked), 'rd');
+  $('tWin').innerHTML = chips(gameCards.filter(c => c.won), 'am', '★ ');
+
+  $('finMsg').classList.toggle('hidden', game?.status !== 'finished');
+  $('claimMsg').classList.toggle('hidden', game?.status !== 'claiming');
+  if (game?.status === 'claiming' && game.claim_end) {
+    const left = Math.max(0, Math.ceil((new Date(game.claim_end) - Date.now()) / 1000));
+    $('claimMsg').textContent = '🏆 ቢንጎ ተብሏል! ሌሎች ቢንጎ ለማለት ቀሪ ሰከንድ: ' + left;
+  }
+
+  buildBoard();
+  renderStrip();
+  if (page === 'bingo') renderCards();
+  if (page === 'wallet') renderMyTx();
+  if (page === 'admin' && isFA()) renderFin();
+  if (page === 'owner') renderOwner();
+
+  $('dAdm').classList.toggle('hidden', !(isGA() || isFA()));
+  $('dOwn').classList.toggle('hidden', cur.role !== 'OWNER');
+
+  const sf = $('safeBtn');
+  if (sf) { sf.textContent = settings?.app_on ? '🟢 ON' : '🔴 OFF'; sf.className = 'btn sm ' + (settings?.app_on ? 'b-ok' : 'b-bad'); }
+
+  if (isGA() && !cfgDirty) {
+    $('cfgMax').value = settings?.max_cards || 30;
+    queue = JSON.parse(JSON.stringify(Array.isArray(settings?.game_queue) ? settings.game_queue : []));
+    autoUI = !!settings?.auto_on;
+    syncAutoBtn();
+  }
+  if (isGA()) renderQueue();
+  updCountdown();
+  updFloat();
+}
+
+function updFloat() {
+  const el = $('floatBall'); if (!el) return;
+  const d = game?.drawn || [], last = d.at(-1);
+  const show = page === 'bingo' && prefs.showInfo && !boardVisible && last;
+  el.classList.toggle('hidden', !show);
+  if (show) el.innerHTML = `<span class="ball ${letter(last)}" style="width:42px;height:42px;font-size:14px">${letter(last)}-${last}</span><span class="text-[11px] leading-tight font-bold">🔢 ${d.length}/75<br>↑ ወደ ላይ</span>`;
+}
+
+function renderStrip() {
+  const el = $('stripRow'); if (!el) return;
+  const d = game?.drawn || [], last = d.at(-1), key = d.length + ':' + (last || 0) + ':' + (game?.id || 0);
+  if (key === lastStripKey) return;
+  lastStripKey = key;
+  $('stripCnt').textContent = d.length;
+  if (!d.length) { el.innerHTML = '<span class="text-slate-500 text-sm">ገና ኳስ አልወጣም</span>'; return; }
+  el.innerHTML = [...d].reverse().map((n, i) => i === 0
+    ? `<span class="sball big ${letter(n)}">${letter(n)}-${n}</span>`
+    : `<span class="sball ${letter(n)}">${n}</span>`).join('');
+}
+
+function buildBoard() {
+  const _dr = game?.drawn || [], _key = _dr.length + ':' + (_dr.at(-1) || 0);
+  if (_key === lastBoardKey) return;
+  lastBoardKey = _key;
+  const col = {B:'#3b82f6',I:'#ef4444',N:'#22c55e',G:'#8b5cf6',O:'#f97316'};
+  const drawn = game?.drawn || [], last = drawn.at(-1);
+  let h = '';
+  [['B',1],['I',16],['N',31],['G',46],['O',61]].forEach(([L,s]) => {
+    h += `<div class="brow"><b style="color:${col[L]};border-color:${col[L]};background:#222">${L}</b>`;
+    for (let n = s; n < s + 15; n++) h += `<span class="num ${drawn.includes(n)?'d-'+L:''} ${n===last?'last':''}">${n}</span>`;
+    h += '</div>';
+  });
+  $('board').innerHTML = h;
+}
+
+function renderCards() {
+  const box = $('cards');
+  box.style.gridTemplateColumns = 'repeat(' + prefs.cols + ',minmax(0,1fr))';
+  document.documentElement.style.setProperty('--cf', ({1:'20px',2:'15px',3:'11px',4:'9px'})[prefs.cols]);
+  $('regBar').classList.toggle('hidden', !myCards.length || selMode || !(canReg() || myCards.some(c => !c.game_id)));
+  const sig = JSON.stringify([prefs.cols, prefs.order, selMode, [...selected], game?.status, game?.type, (game?.drawn || []).length,
+    myCards.map(c => [c.id, c.game_id, c.registered, c.locked, c.won, (c.marked || []).join(','), c.price])]);
+  if (sig === lastCardsSig) return;
+  lastCardsSig = sig;
+  if (!myCards.length) {
+    box.innerHTML = '<div class="glass p-8 text-center text-slate-400 text-sm" style="grid-column:1/-1">ካርድ ገና አልገዙም<br><span class="text-[11px]">ቀዩን + ቁልፍ ይጫኑ</span></div>';
+    return;
+  }
+  const live = ['playing','claiming'].includes(game?.status), lk = !canReg();
+  const bg = ['#16a34a','#ef4444','#0d9488','#3b82f6','#f59e0b'];
+  const list = [...myCards].sort((a, b) =>
+    prefs.order === 'asc' ? a.id - b.id :
+    prefs.order === 'reg' ? (Number(b.registered) - Number(a.registered)) || (b.id - a.id) : b.id - a.id);
+
+  box.innerHTML = list.map(c => {
+    const nx = !c.game_id;
+    let b;
+    if (c.won) b = '<span class="tag t-ok">Bingo ★</span>';
+    else if (c.locked) b = '<span class="tag t-no">Blocked</span>';
+    else if (live && !nx) b = c.registered ? `<button onclick="claim(${c.id})" class="tag t-ok">Bingo!</button>` : '<span class="tag t-no">Not in game</span>';
+    else if (game?.status === 'finished' && !nx) b = '<span class="tag">ጨዋታ ተጠናቋል</span>';
+    else if (lk && !nx) b = c.registered ? '<span class="tag t-ok">Registered</span>' : '<span class="tag t-no">Not in game</span>';
+    else b = c.registered
+      ? `<button onclick="toggleReg(${c.id})" class="tag t-ok">✓ Registered</button>`
+      : `<button onclick="toggleReg(${c.id})" class="tag t-reg">Register Card</button>`;
+    const cells = (c.grid || []).map(v => v === 'F' ? '<div class="cell fr">F</div>'
+      : `<button class="cell ${(c.marked||[]).includes(v)?'mk':((!nx && (game?.drawn||[]).includes(v))?'called':'')}" ${live && !nx && !c.locked && !c.won ? `onclick="toggleMark(${c.id},${v})"` : ''}>${v}</button>`).join('');
+    return `<div class="pc ${c.won?'win':''} ${c.locked?'lock':''} ${selected.has(c.id)?'sel':''}">
+      <div class="ph" ${selMode ? `onclick="toggleSel(${c.id})"` : ''}><span class="flex items-center gap-2">${selMode ? (selected.has(c.id)?'☑':'☐') : '▭'} ${c.id} ${nx ? '<span class="chip !px-2 !py-0.5 !text-[11px]" style="background:#2563eb">ለቀጣይ ጨዋታ</span>' : `<span class="chip am !px-2 !py-0.5 !text-[12px]">R-${remaining(c)}</span>`}</span>${(!selMode && (nx || canEdit())) ? `<button onclick="askDel(${c.id})" class="text-white/90 text-lg leading-none">✕</button>` : ''}</div>
+      <div class="text-center py-1.5">${b}</div>
+      <div class="pl">${'BINGO'.split('').map((l,i)=>`<div style="background:${bg[i]}">${l}</div>`).join('')}</div>
+      <div class="pg">${cells}</div>
+    </div>`;
+  }).join('');
+}
+
+async function renderMyTx() {
+  const { data } = await sb.from('transactions').select('*').eq('user_id', cur.id).order('id', { ascending: false }).limit(40);
+  const list = data || [];
+  $('myTx').innerHTML = list.length
+    ? list.map(t => {
+        const [lbl, cls] = TX_LBL[t.type] || [t.type, ''];
+        const isTr = t.type.startsWith('TRANSFER') || t.type === 'PRIZE';
+        const sign = (t.type === 'TRANSFER_IN' || t.type === 'PRIZE') ? '+' : t.type === 'TRANSFER_OUT' ? '−' : '';
+        const st = isTr ? `<span class="text-slate-400">${esc(t.ref)}</span>`
+          : `<span class="${t.status==='APPROVED'?'text-emerald-400':t.status==='REJECTED'?'text-red-400':'text-amber-400'}">${t.status==='APPROVED'?'ተቀብሏል':t.status==='REJECTED'?'ተሰርዟል':'በመጠበቅ'}</span>`;
+        return `<div class="flex justify-between py-1.5 border-b border-white/10"><b class="${cls}">${lbl}</b><span>${sign}${fmt(t.amount)} ብር</span>${st}</div>`;
+      }).join('')
+    : '<p class="text-center text-slate-400 py-3">ምንም የለም</p>';
+}
+
+// ---- finance admin ----
+function finCard(t, pending, adminName) {
+  const isDep = t.type === 'DEPOSIT', nm = t.users?.name || '—', ini = (nm.trim()[0] || '?').toUpperCase();
+  const col = isDep ? '#10b981' : '#f59e0b';
+  const stLbl = t.status === 'APPROVED' ? '<span class="text-emerald-400">✓ ተፈቅዷል</span>' : '<span class="text-red-400">✕ ተሰርዟል</span>';
+  return `<div class="rounded-2xl border border-white/10 bg-white/5 overflow-hidden">
+    <div class="flex items-center gap-3 p-3">
+      <div class="w-11 h-11 rounded-full flex items-center justify-center font-extrabold text-lg text-white shrink-0" style="background:linear-gradient(135deg,${col},#6366f1)">${esc(ini)}</div>
+      <div class="min-w-0 flex-1"><b class="block truncate">${esc(nm)}</b><span class="text-[11px] text-slate-400">${esc(t.users?.phone || '')} · ${esc(t.method)}</span></div>
+      <div class="text-right shrink-0"><div class="text-[10px] font-bold" style="color:${col}">${isDep ? '⬇ ዲፖዚት' : '⬆ ዊዝድሮው'}</div><div class="text-lg font-extrabold">${fmt(t.amount)} <span class="text-xs">ብር</span></div></div>
+    </div>
+    <div class="mx-3 mb-3 rounded-xl bg-black/30 px-3 py-2 text-[12px] flex items-center justify-between gap-2"><span class="text-slate-400 shrink-0">${isDep ? 'Ref' : 'ስልክ/አካውንት'}</span><span class="font-mono truncate">${esc(t.ref)}</span><button data-r="${esc(t.ref)}" onclick="copy(this.dataset.r)" class="shrink-0">📋</button></div>
+    ${pending
+      ? `<div class="grid grid-cols-2 gap-2 p-3 pt-0"><button onclick="approve(${t.id})" class="btn b-ok">✓ ፍቀድ</button><button onclick="reject(${t.id})" class="btn b-bad">✕ ሰርዝ</button></div>`
+      : `<div class="flex justify-between items-center px-3 pb-3 text-[11px] gap-2"><span>${stLbl} · ${esc(adminName || '—')} · ${fdate(t.processed_at)}</span><button onclick="undoTx(${t.id})" class="btn b-gray sm">↩ ሻር</button></div>`}
+  </div>`;
+}
+let finData = { pend: [], done: [], um: {} };
+function renderFinLists() {
+  const q = ($('fSearch')?.value || '').trim().toLowerCase();
+  const ok = t => !q || [t.users?.name, t.users?.phone, t.ref, t.method].join(' ').toLowerCase().includes(q);
+  const pend = finData.pend.filter(ok), done = finData.done.filter(ok);
+  finData = { pend, done, um };
+  renderFinLists();
+}
+
+// ---- owner dashboard ----
+let lastOwnerFetch = 0, ownerSig = '', openAdm = new Set();
+function toggleAdm(id, o) { o ? openAdm.add(id) : openAdm.delete(id); }
+async function renderOwner(force) {
+  if (cur.role !== 'OWNER') return;
+  if (!force && Date.now() - lastOwnerFetch < 10000) return;
+  lastOwnerFetch = Date.now();
+  const [{ data: us }, { data: tx }] = await Promise.all([
+    sb.from('users').select('id, name, phone, balance, role').order('id', { ascending: false }).limit(1000),
+    sb.from('transactions').select('*').order('id', { ascending: false }).limit(1500)
+  ]);
+  userMap = {}; (us || []).forEach(u => userMap[u.id] = u);
+  allTx = tx || [];
+  const sig = [oTabNow, allTx.length, allTx[0]?.id || 0, allTx.filter(t => t.status !== 'PENDING').length, (us || []).length,
+    (us || []).reduce((a, u) => a + Number(u.balance || 0), 0), (us || []).filter(u => u.role !== 'USER').map(u => u.id + u.role).join(',')].join('|');
+  if (!force && sig === ownerSig) return;
+  ownerSig = sig;
+  if (oTabNow === 'fin') renderOwnerFin();
+  if (oTabNow === 'hist') renderHist();
+  if (oTabNow === 'staff') {
+    const staff = (us || []).filter(u => ['ADMIN_GAME','ADMIN_FINANCE'].includes(u.role));
+    $('oStaff').innerHTML = staff.length ? staff.map(u => `<div class="flex items-center justify-between gap-2 py-2 border-b border-white/10">
+      <div><b>${esc(u.name)}</b> <span class="text-slate-500">${esc(u.phone)}</span><div class="text-[11px] text-indigo-300">${ROLE_LBL[u.role]}</div></div>
+      <button class="btn b-bad sm" onclick="removeAdmin(${u.id})">አስወግድ</button></div>`).join('')
+      : '<p class="text-slate-400 text-center py-3">ምንም አድሚን የለም</p>';
+  }
+  if (oTabNow === 'users') {
+    $('oUsers').innerHTML = (us || []).slice(0, 200).map(u => `<div class="flex flex-wrap items-center justify-between gap-2 py-2 border-b border-white/10">
+      <div><b>${esc(u.name)}</b> <span class="text-slate-500">${esc(u.phone)}</span><div class="text-[10px] text-slate-500">${ROLE_LBL[u.role] || u.role}</div></div>
+      <b class="text-emerald-400">${fmt(u.balance)}</b></div>`).join('');
+  }
+}
+
+function periodStats(from) {
+  let inc = 0, out = 0;
+  allTx.forEach(t => {
+    if (t.status !== 'APPROVED' || !['DEPOSIT','WITHDRAW'].includes(t.type)) return;
+    const d = new Date(t.processed_at || t.created_at || 0);
+    if (from && d < from) return;
+    if (t.type === 'DEPOSIT') inc += Number(t.amount); else out += Number(t.amount);
+  });
+  return { inc, out, profit: inc - out };
+}
+
+function renderOwnerFin() {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const wk = new Date(today); wk.setDate(wk.getDate() - ((today.getDay() + 6) % 7));
+  const mo = new Date(now.getFullYear(), now.getMonth(), 1);
+  const periods = [['📅 የዛሬ', today], ['🗓 የሳምንቱ', wk], ['🈷 የወሩ', mo], ['∞ ጠቅላላ', null]];
+  $('oPeriods').innerHTML = periods.map(([lbl, from]) => {
+    const s = periodStats(from);
+    return `<div class="glass p-4"><div class="font-bold text-sm mb-2">${lbl}</div>
+      <div class="grid grid-cols-3 gap-2 text-center text-[11px]">
+        <div class="pbox"><div class="text-slate-400">ገቢ</div><b class="text-base text-emerald-400">${fmt(s.inc)}</b></div>
+        <div class="pbox"><div class="text-slate-400">ወጪ</div><b class="text-base text-red-400">${fmt(s.out)}</b></div>
+        <div class="pbox"><div class="text-slate-400">ትርፍ</div><b class="text-base ${s.profit>=0?'text-amber-400':'text-red-500'}">${fmt(s.profit)}</b></div>
+      </div></div>`;
+  }).join('');
+
+  // አድሚን በአድሚን — ሙሉ ዳታ (ያጸደቁት እና የሰረዙት ሁሉም ግብይቶች)
+  const by = {};
+  allTx.forEach(t => {
+    if (t.status === 'PENDING' || !['DEPOSIT','WITHDRAW'].includes(t.type)) return;
+    const key = t.approved_by || 'none';
+    const a = by[key] = by[key] || { list: [], depN: 0, dep: 0, wdN: 0, wd: 0, rejN: 0, rej: 0 };
+    a.list.push(t);
+    const amt = Number(t.amount);
+    if (t.status === 'REJECTED') { a.rejN++; a.rej += amt; }
+    else if (t.type === 'DEPOSIT') { a.depN++; a.dep += amt; }
+    else { a.wdN++; a.wd += amt; }
+  });
+  const ids = Object.keys(by).sort((x, y) => (x === 'none') - (y === 'none') || by[y].list.length - by[x].list.length);
+  const row = t => {
+    const u = userMap[t.user_id] || {}, ok = t.status === 'APPROVED';
+    return `<div class="rounded-lg bg-black/30 p-2 text-[11px] space-y-0.5">
+      <div class="flex justify-between gap-2"><b>${esc(u.name || '—')} <span class="text-slate-500 font-normal">${esc(u.phone || '')}</span></b>
+        <b class="${t.type === 'DEPOSIT' ? 'text-emerald-400' : 'text-amber-400'}">${t.type === 'DEPOSIT' ? '⬇ ዲፖዚት' : '⬆ ዊዝድሮው'} ${fmt(t.amount)}</b></div>
+      <div class="flex justify-between gap-2 text-slate-400"><span>${esc(t.method)} · <span class="font-mono">${esc(t.ref)}</span></span><b class="${ok ? 'text-emerald-400' : 'text-red-400'}">${ok ? '✓ ተፈቅዷል' : '✕ ተሰርዟል'}</b></div>
+      <div class="text-slate-500">${fdate(t.processed_at || t.created_at)}</div></div>`;
+  };
+  $('oByAdmin').innerHTML = ids.length ? ids.map(id => {
+    const a = by[id], nm = id === 'none' ? 'ያልታወቀ አድሚን (ከዚህ በፊት የተሰሩ)' : (userMap[id]?.name || 'አድሚን #' + id);
+    const ph = id === 'none' ? '' : (userMap[id]?.phone || '');
+    return `<details class="rounded-2xl border border-white/10 bg-white/5" ${openAdm.has(id) ? 'open' : ''} ontoggle="toggleAdm('${id}',this.open)">
+      <summary class="p-3 flex justify-between items-center gap-2">
+        <div><b>${esc(nm)}</b> <span class="text-slate-500 text-[11px]">${esc(ph)}</span>
+          <div class="text-[10px] text-slate-500">ያጸደቀው: ${a.depN + a.wdN} · የሰረዘው: ${a.rejN} · ጠቅላላ: ${a.list.length}</div></div>
+        <div class="text-right text-[12px]"><div class="text-emerald-400">⬇ ${fmt(a.dep)}</div><div class="text-red-400">⬆ ${fmt(a.wd)}</div></div>
+      </summary>
+      <div class="px-3 pb-3 space-y-2">
+        <div class="grid grid-cols-2 gap-2 text-center text-[11px]">
+          <div class="pbox"><div class="text-slate-400">✓ ዲፖዚት (${a.depN})</div><b class="text-emerald-400">${fmt(a.dep)}</b></div>
+          <div class="pbox"><div class="text-slate-400">✓ ዊዝድሮው (${a.wdN})</div><b class="text-amber-400">${fmt(a.wd)}</b></div>
+          <div class="pbox"><div class="text-slate-400">✕ የተሰረዘ (${a.rejN})</div><b class="text-red-400">${fmt(a.rej)}</b></div>
+          <div class="pbox"><div class="text-slate-400">ልዩነት (ዲፖዚት − ዊዝድሮው)</div><b>${fmt(a.dep - a.wd)}</b></div>
+        </div>
+        <div class="text-[11px] font-bold text-slate-400">ሙሉ ዝርዝር (${a.list.length})</div>
+        <div class="max-h-80 overflow-y-auto space-y-1.5">${a.list.map(row).join('')}</div>
+      </div></details>`;
+  }).join('') : '<p class="text-slate-400 text-center py-3">ገና ማንም አላጸደቀም</p>';
+}
+
+function renderHist() {
+  const ty = $('hfType').value, st = $('hfStat').value, q = $('hfQ').value.trim().toLowerCase();
+  const list = allTx.filter(t => {
+    if (ty === 'TRANSFER_OUT' ? !t.type.startsWith('TRANSFER') : (ty && t.type !== ty)) return false;
+    if (st && t.status !== st) return false;
+    if (q) {
+      const u = userMap[t.user_id] || {};
+      if (![u.name, u.phone, t.ref, t.method].join(' ').toLowerCase().includes(q)) return false;
+    }
+    return true;
+  }).slice(0, 300);
+  $('oHist').innerHTML = list.length ? list.map(t => {
+    const u = userMap[t.user_id] || {}, a = userMap[t.approved_by];
+    const [lbl, cls] = TX_LBL[t.type] || [t.type, ''];
+    const isTr = t.type.startsWith('TRANSFER') || t.type === 'PRIZE';
+    const sc = t.status === 'APPROVED' ? 'text-emerald-400' : t.status === 'REJECTED' ? 'text-red-400' : 'text-amber-400';
+    const sl = t.status === 'APPROVED' ? 'ተቀብሏል' : t.status === 'REJECTED' ? 'ተሰርዟል' : 'በመጠበቅ';
+    return `<div class="rounded-xl border border-white/10 bg-white/5 p-3 text-[12px] space-y-1">
+      <div class="flex justify-between"><b>${esc(u.name || '—')} <span class="text-slate-500 font-normal">${esc(u.phone || '')}</span></b><b class="${cls}">${lbl} ${fmt(t.amount)}</b></div>
+      <div class="flex justify-between text-slate-400"><span>${esc(t.method)} · <span class="font-mono">${esc(t.ref)}</span></span><b class="${sc}">${sl}</b></div>
+      <div class="flex justify-between text-[11px] text-slate-500"><span>ጠየቀ: ${fdate(t.created_at || t.processed_at)}</span>${isTr ? '' : `<span>ያጸደቀ/የሰረዘ: <b class="text-indigo-400">${a ? esc(a.name) : '—'}</b></span>`}</div>
+      ${t.processed_at && !isTr ? `<div class="text-[11px] text-slate-500">ሰዓት: ${fdate(t.processed_at)}</div>` : ''}
+    </div>`;
+  }).join('') : '<p class="text-center text-slate-400 py-6 text-xs">ምንም የለም</p>';
+}
+
+// ===================== FAB =====================
+function buildFab() {
+  $('fabMenu').innerHTML = [1,2,3,4,5,6,7,8,9,10].map(n => `<button onclick="buy(${n})" class="w-12 h-12 rounded-full text-white font-bold shadow-lg bg-[#f44336]">${n}</button>`).join('');
+}
+function toggleFab() {
+  fabOpen = !fabOpen;
+  $('fabMenu').classList.toggle('hidden', !fabOpen);
+  $('fabMenu').classList.toggle('flex', fabOpen);
+}
+
+// ===================== REALTIME =====================
+function startRealtime() {
+  sb.channel('b13')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'games' }, () => syncGame())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'cards' }, async () => { await refreshMyCards(); await refreshGameCards(); render(); })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'settings' }, async () => { await loadSettings(); render(); })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'users' }, async () => { await refreshUser(); render(); })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions' }, (pl) => {
+      if (pl?.eventType === 'INSERT' && isFA() && pl.new?.status === 'PENDING' && ['DEPOSIT','WITHDRAW'].includes(pl.new.type))
+        notifyUser((pl.new.type === 'DEPOSIT' ? '⬇ አዲስ የዲፖዚት ጥያቄ: ' : '⬆ አዲስ የዊዝድሮው ጥያቄ: ') + fmt(pl.new.amount) + ' ብር');
+      if (page === 'admin' && isFA()) renderFin(true);
+      if (page === 'wallet') renderMyTx();
+      if (page === 'owner') renderOwner(true);
+    })
+    .subscribe();
+}
+
+// ===================== INIT =====================
+async function enter() {
+  $('auth').classList.add('hidden');
+  $('app').classList.remove('hidden');
+  buildFab(); applyPrefs();
+  if (window.IntersectionObserver && !window._io) {
+    window._io = new IntersectionObserver(es => { boardVisible = es[0].isIntersecting; updFloat(); });
+    window._io.observe($('boardBox'));
+  }
+  await loadSettings(); await loadGame(); await refreshMyCards(); await refreshGameCards();
+  startRealtime();
+  if (isGA() || isFA()) dbCheck();
+  go(cur.role === 'OWNER' ? 'owner' : cur.role === 'USER' ? 'bingo' : 'admin');
+  clearInterval(tick);
+  tick = setInterval(async () => {
+    if (tickBusy) return;
+    tickBusy = true;
+    try {
+      if (autoOK) {
+        const { error } = await sb.rpc('auto_tick');
+        if (error && /PGRST202|Could not find|does not exist/i.test((error.code || '') + ' ' + (error.message || ''))) autoOK = false;
+      }
+      await refreshUser();
+      await syncGame(++tickN % 2 === 0);
+    } finally { tickBusy = false; }
+  }, 3000);
+  clearInterval(cdTimer); cdTimer = setInterval(updCountdown, 1000);
+}
+
+function logout() {
+  clearInterval(tick);
+  cur = null;
+  sessionStorage.removeItem('b13_uid');
+  closeDrawer();
+  $('app').classList.add('hidden');
+  $('auth').classList.remove('hidden');
+  $('lPass').value = '';
+}
+
+function copy(v) {
+  (navigator.clipboard ? navigator.clipboard.writeText(v) : Promise.reject())
+    .then(() => toast('ተቀድቷል: ' + v))
+    .catch(() => prompt('Copy:', v));
+}
+
+window.addEventListener('load', async () => {
+  applyPrefs();
+  await loadSettings();
+  $('btnLogin').onclick = withLoading($('btnLogin'), login);
+  $('btnSignup').onclick = withLoading($('btnSignup'), signup);
+  $('btnSetupOwner').onclick = withLoading($('btnSetupOwner'), setupOwner);
+  $('btnDeposit').onclick = withLoading($('btnDeposit'), deposit);
+  $('btnWithdraw').onclick = withLoading($('btnWithdraw'), withdraw);
+  $('btnTransfer').onclick = withLoading($('btnTransfer'), transfer);
+  $('btnApplyCfg').onclick = withLoading($('btnApplyCfg'), applyCfg);
+  $('btnPrepare').onclick = withLoading($('btnPrepare'), prepare);
+  $('btnStart').onclick = withLoading($('btnStart'), startGame);
+  $('btnDraw').onclick = withLoading($('btnDraw'), draw);
+  $('btnReset').onclick = withLoading($('btnReset'), resetGame);
+  $('btnNew').onclick = withLoading($('btnNew'), () => newGame(false));
+  $('safeBtn').onclick = withLoading($('safeBtn'), toggleSafe);
+  $('btnAddAdmin').onclick = withLoading($('btnAddAdmin'), addAdmin);
+  $('btnForgot').onclick = withLoading($('btnForgot'), forgotSubmit);
+  $('btnOtp').onclick = withLoading($('btnOtp'), async () => { await submitOtp(); chkOtp(); });
+  const oi = otpIn();
+  oi.forEach((el, i) => {
+    el.addEventListener('input', () => { el.value = el.value.replace(/\D/g, '').slice(-1); if (el.value && oi[i + 1]) oi[i + 1].focus(); chkOtp(); });
+    el.addEventListener('keydown', e => { if (e.key === 'Backspace' && !el.value && oi[i - 1]) oi[i - 1].focus(); });
+    el.addEventListener('paste', e => { const d = ((e.clipboardData || window.clipboardData).getData('text') || '').replace(/\D/g, '').slice(0, 4); if (d) { e.preventDefault(); oi.forEach((x, k) => x.value = d[k] || ''); chkOtp(); } });
+  });
+  $('dRef').addEventListener('paste', e => {
+    const txt = (e.clipboardData || window.clipboardData).getData('text') || '';
+    e.preventDefault();
+    const r = extractRef(txt);
+    $('dRef').value = r || txt.trim().slice(0, 30).toUpperCase();
+    toast(r ? 'Ref ቁጥር ተገኝቷል: ' + r : 'Ref ቁጥር አልተገኘም — ያረጋግጡ', r ? '' : 'i');
+  });
+  $('dRef').addEventListener('input', e => { const v = e.target.value; if (/\s/.test(v.trim()) || v.length > 24) { const r = extractRef(v); if (r) e.target.value = r; } });
+
+  setTimeout(() => {
+    const x = $('splash');
+    x.style.transition = 'opacity .5s'; x.style.opacity = '0';
+    setTimeout(() => x.remove(), 520);
+  }, 1500);
+
+  const { data: owners } = await sb.from('users').select('id').eq('role', 'OWNER').limit(1);
+  if (!owners || !owners.length) setTimeout(() => openM('mSetup'), 1800);
+
+  const uid = +sessionStorage.getItem('b13_uid');
+  if (uid) {
+    const { data } = await sb.from('users').select('*').eq('id', uid).single();
+    if (data && (settings?.app_on || data.role === 'OWNER')) { cur = data; enter(); }
+  }
+});
+</script>
+</body>
+</html>
