@@ -189,9 +189,9 @@ html:not(.light) .drawer{background:rgba(12,15,28,.93)!important;backdrop-filter
 #auth .text-5xl{display:inline-block;animation:flt 3.2s ease-in-out infinite;filter:drop-shadow(0 8px 18px rgba(167,139,250,.55))}
 @keyframes flt{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-8px) rotate(4deg)}}
 .authbody{background:rgba(255,255,255,.035)!important;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid rgba(255,255,255,.11);box-shadow:0 -24px 70px rgba(0,0,0,.45)}
-#pg-bingo,#pg-wallet,#pg-admin,#pg-owner,#pg-keno,#pg-avatar{animation:rise .38s cubic-bezier(.2,.7,.2,1) both}
+#pg-bingo,#pg-wallet,#pg-admin,#pg-owner{animation:rise .38s cubic-bezier(.2,.7,.2,1) both}
 @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion:reduce){.num.last,#auth .text-5xl,#pg-bingo,#pg-wallet,#pg-admin,#pg-owner,#pg-keno,#pg-avatar{animation:none!important}}
+@media (prefers-reduced-motion:reduce){.num.last,#auth .text-5xl,#pg-bingo,#pg-wallet,#pg-admin,#pg-owner{animation:none!important}}
 
 /* ===================== v23 — blue/light "sportsbook" style ===================== */
 #bnav{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;align-items:flex-end;height:calc(64px + env(safe-area-inset-bottom,0px));padding-bottom:env(safe-area-inset-bottom,0px);background:#fff;border-top:1px solid #dbe3ec;box-shadow:0 -4px 18px rgba(20,60,100,.08)}
@@ -419,44 +419,6 @@ html.light .hp{background:#eef3f8;color:#5f87ad}
       <div id="cards" class="grid gap-1.5"></div>
     </div>
 
-    <div id="pg-keno" class="hidden max-w-lg mx-auto gz space-y-3">
-      <div class="gz-tabs"><button onclick="go('bingo')">🎱 ቢንጎ</button><button class="on" onclick="go('keno')">🔢 Keno</button><button onclick="go('avatar')">✈️ Avatar</button></div>
-      <div class="pn">
-        <div class="flex items-center justify-between mb-3">
-          <div><div class="text-[11px]" style="color:var(--mu)">የተመረጡ ቁጥሮች</div><b class="text-2xl"><span id="knCnt">0</span><span style="color:var(--mu);font-size:15px"> / 10</span></b></div>
-          <div class="flex gap-2"><button class="chp" onclick="kenoQuick()">🎲 ራስ-ሰር</button><button class="chp" onclick="kenoClear()">አጥፋ</button></div>
-        </div>
-        <div id="knGrid" class="grid grid-cols-8"></div>
-      </div>
-      <div class="pn space-y-3">
-        <div><div class="text-[11px] mb-1.5" style="color:var(--mu)">ሽልማት በተመታ ቁጥር</div><div id="knLad" class="flex gap-1.5 overflow-x-auto pb-1"></div></div>
-        <div class="stp"><button onclick="knStep(-1)">−</button><input id="knBet" type="number" min="5" max="1000" value="10" inputmode="numeric"><button onclick="knStep(1)">+</button></div>
-        <div class="flex gap-2 overflow-x-auto"><button class="chp" onclick="knSet(10)">10</button><button class="chp" onclick="knSet(50)">50</button><button class="chp" onclick="knSet(100)">100</button><button class="chp" onclick="knSet(500)">500</button><button class="chp" onclick="knSet('max')">ሁሉንም</button></div>
-        <button id="knPlay" class="cta" onclick="kenoPlay()">ተጫወት</button>
-        <div id="knRes" class="rs min-h-[44px] flex flex-col items-center justify-center"></div>
-      </div>
-      <div class="pn"><div class="font-bold text-sm mb-1">ያለፉ ዙሮች</div><div id="knHist"></div></div>
-    </div>
-
-    <div id="pg-avatar" class="hidden max-w-lg mx-auto gz space-y-3">
-      <div class="gz-tabs"><button onclick="go('bingo')">🎱 ቢንጎ</button><button onclick="go('keno')">🔢 Keno</button><button class="on" onclick="go('avatar')">✈️ Avatar</button></div>
-      <div id="avHist" class="flex gap-1.5 overflow-x-auto min-h-[26px]"></div>
-      <div class="relative overflow-hidden" style="height:270px;border-radius:22px;border:1px solid var(--ln);background:radial-gradient(120% 90% at 85% 0,#2c2566 0,#141a36 45%,#090b13 100%)">
-        <canvas id="avCv" style="width:100%;height:100%;display:block"></canvas>
-        <div class="absolute inset-x-0 top-6 text-center pointer-events-none"><b id="avMult" style="font-size:58px;font-weight:900;letter-spacing:-1px;line-height:1">—</b><div id="avSub" class="text-xs mt-1" style="color:var(--mu)"></div></div>
-        <div class="absolute left-3 bottom-2 text-[11px] pointer-events-none" style="color:var(--mu)">👥 <b id="avPl">0</b> · 💰 <b id="avPool">0</b> ብር</div>
-      </div>
-      <div class="pn space-y-3">
-        <div class="stp"><button onclick="avStep(-1)">−</button><input id="avAmt" type="number" min="5" max="1000" value="10" inputmode="numeric"><button onclick="avStep(1)">+</button></div>
-        <div class="flex gap-2 overflow-x-auto"><button class="chp" onclick="avSet(10)">10</button><button class="chp" onclick="avSet(50)">50</button><button class="chp" onclick="avSet(100)">100</button><button class="chp" onclick="avSet(500)">500</button><button class="chp" onclick="avSet('max')">ሁሉንም</button></div>
-        <div class="flex items-center gap-2"><span class="text-xs" style="color:var(--mu);flex:none">ራስ-ወጪ ×</span>
-          <div class="stp flex-1"><input id="avAuto" type="number" step="0.01" min="1.01" placeholder="አማራጭ" style="font-size:16px;height:40px"></div>
-          <button class="chp" onclick="avAutoSet(1.5)">1.5</button><button class="chp" onclick="avAutoSet(2)">2</button><button class="chp" onclick="avAutoSet(5)">5</button><button class="chp" onclick="avAutoSet('')">✕</button></div>
-        <button id="avBtn" class="cta" onclick="avAct()">ውርርድ አድርግ</button>
-        <p id="avMsg" class="text-center text-xs min-h-[16px]" style="color:var(--mu)"></p>
-      </div>
-    </div>
-
     <div id="pg-wallet" class="hidden space-y-3 max-w-lg mx-auto">
       <div id="wDep" class="card p-4 space-y-3">
         <h3 class="font-extrabold" data-i="w_dep">⬇️ ማስገባት (ዲፖዚት)</h3>
@@ -590,8 +552,6 @@ html.light .hp{background:#eef3f8;color:#5f87ad}
       <div class="flex gap-2 overflow-x-auto pb-1">
         <button class="otab on" data-t="fin" onclick="oTab('fin')">💰 ገቢ እና ወጪ</button>
         <button class="otab" data-t="hist" onclick="oTab('hist')">📜 ታሪክ</button>
-        <button class="otab" data-t="keno" onclick="oTab('keno')">🔢 Keno</button>
-        <button class="otab" data-t="avatar" onclick="oTab('avatar')">✈️ Avatar</button>
         <button class="otab" data-t="staff" onclick="oTab('staff')">🛡️ አድሚኖች</button>
         <button class="otab" data-t="users" onclick="oTab('users')">👥 ተጠቃሚዎች</button>
         <button class="otab" data-t="safe" onclick="oTab('safe')">🔒 ሴፍቲ</button>
@@ -608,16 +568,6 @@ html.light .hp{background:#eef3f8;color:#5f87ad}
         </div>
         <input id="hfQ" class="inp !py-2 !text-xs" placeholder="ፈልግ: ስም / ስልክ / Ref" oninput="renderHist()">
         <div id="oHist" class="space-y-2 max-h-[65vh] overflow-y-auto"></div>
-      </div>
-      <div id="ot-keno" class="hidden space-y-3">
-        <div id="okPeriods" class="space-y-3"></div>
-        <div class="glass p-4"><h3 class="font-bold text-sm mb-2">🏅 ከፍተኛ ተጫዋቾች (ጠቅላላ)</h3><div id="okTop" class="space-y-1 text-xs"></div></div>
-        <button class="btn b-gray sm" onclick="renderOwnerKeno()">↻ አድስ</button>
-      </div>
-      <div id="ot-avatar" class="hidden space-y-3">
-        <div id="oaPeriods" class="space-y-3"></div>
-        <div class="glass p-4"><h3 class="font-bold text-sm mb-2">🏅 ከፍተኛ ተጫዋቾች (ጠቅላላ)</h3><div id="oaTop" class="space-y-1 text-xs"></div></div>
-        <button class="btn b-gray sm" onclick="renderOwnerAvatar()">↻ አድስ</button>
       </div>
       <div id="ot-staff" class="hidden space-y-3">
         <div class="glass p-4 space-y-3">
@@ -650,7 +600,6 @@ html.light .hp{background:#eef3f8;color:#5f87ad}
   <nav id="bnav">
     <button data-p="bingo" onclick="go('bingo')"><i>🎱</i>ቢንጎ</button>
     <button data-p="wallet" onclick="go('wallet')"><i>👛</i>ዋሌት</button>
-    <button class="mid" onclick="go('keno')"><i>🎮</i>ጨዋታዎች</button>
     <button onclick="openM('mSet')"><i>⚙️</i>ቅንብር</button>
     <button onclick="openDrawer()"><i>☰</i>ምናሌ</button>
   </nav>
@@ -1077,4 +1026,60 @@ const I18N = {
 "ትክክለኛ ስልክ (09xxxxxxxx)":["Valid phone (09xxxxxxxx)","Bilbila sirrii (09xxxxxxxx)","ቅኑዕ ተሌፎን (09xxxxxxxx)"],
 "የይለፍ ቃል ቢያንስ 4 ቁምፊ መሆን አለበት":["Password must be at least 4 characters","Jechi iggitaa xiqqaatti qubee 4 ta'uu qaba","መሕለፊ ቃል ብውሑዱ 4 ፊደል ክኸውን ኣለዎ"],
 "የይለፍ ቃል ቢያንስ 4 ቁምፊ":["Password must be at least 4 characters","Jechi iggitaa xiqqaatti qubee 4","መሕለፊ ቃል ብውሑዱ 4 ፊደል"],
-"የይለፍ ቃሉ አይመሳሰልም":["Passwords do not ma
+"የይለፍ ቃሉ አይመሳሰልም":["Passwords do not match","Jechoonni iggitaa wal hin fakkaatan","መሕለፊ ቃላት ኣይመሳሰሉን"],
+"ስልኩ ቀድሞ ተመዝግቧል":["This phone is already registered","Bilbilli kun duraan galmaa'eera","እዚ ተሌፎን ቅድሚ ሕጂ ተመዝጊቡ"],
+"ስህተት ተፈጥሯል":["An error occurred","Dogoggorri uumameera","ጌጋ ተፈጢሩ"],
+"ተመዝግበዋል — ይግቡ":["Registered — please log in","Galmaa'aniirtu — seenaa","ተመዝጊብኩም — እተዉ"],
+"የባለቤት መለያ ተፈጥሯል — ይግቡ":["Owner account created — log in","Herregni abbaa qabeenyaa uumameera — seenaa","ናይ ወናኒ ኣካውንት ተፈጢሩ — እተዉ"],
+"ከፍተኛው {} ካርድ":["Maximum {} cards","Kaartelaan olaanaan {}","ዝለዓለ {} ካርድ"],
+"በቂ ቀሪ ሂሳብ የለዎትም":["Insufficient balance","Herregni isin harkaa hin gahu","ዘኽእል ሒሳብ የብልኩምን"],
+"ስህተት":["Error","Dogoggora","ጌጋ"],
+"{} ካርድ ለቀጣይ ጨዋታ ተገዝቷል — Register ማድረግ አይርሱ":["{} card(s) bought for the next game — don't forget to Register","Kaartelaan {} taphaa itti aanuuf bitameera — Register gochuu hin irraanfatinaa","{} ካርድ ንዝቕጽል ጸወታ ተገዚኡ — Register ምግባር ኣይትርስዑ"],
+"{} ካርድ ተገዝቷል — Register ማድረግ አይርሱ":["{} card(s) bought — don't forget to Register","Kaartelaan {} bitameera — Register gochuu hin irraanfatinaa","{} ካርድ ተገዚኡ — Register ምግባር ኣይትርስዑ"],
+"ጨዋታ በመካሄድ ላይ — ለቀጣይ ጨዋታ ካርቴላ ይግዙ":["Game in progress — buy a card for the next game","Taphni adeemsarra jira — taphaa itti aanuuf kaartelaa bitaa","ጸወታ ይካየድ ኣሎ — ንዝቕጽል ጸወታ ካርተላ ግዙኡ"],
+"ምንም ካርቴላ የለም":["No cards","Kaartelaan tokkollee hin jiru","ዋላ ሓንቲ ካርተላ የለን"],
+"ሁሉም ተመዝግበዋል":["All registered","Hundi galmaa'aniiru","ኩሎም ተመዝጊቦም"],
+"ምዝገባ ተሰርዟል":["Registration cancelled","Galmeen haqameera","ምዝገባ ተሰሪዙ"],
+"ጨዋታ በመካሄድ ላይ":["Game in progress","Taphni adeemsarra jira","ጸወታ ይካየድ ኣሎ"],
+"ካርቴላ ይምረጡ":["Select a card","Kaartelaa filadhaa","ካርተላ ምረጹ"],
+"ተመዝግበዋል":["Registered","Galmaa'aniiru","ተመዝጊቦም"],
+"ቁጥሩ ገና አልወጣም":["This number hasn't been called yet","Lakkoofsi kun ammaan hin ba'in","እዚ ቁጽሪ ገና ኣይወጸን"],
+"ምንም የለም":["Nothing here","Homaa hin jiru","ዋላ ሓንቲ የለን"],
+"ምልክቶች ጠፍተዋል":["Marks cleared","Mallattooleen haqamaniiru","ምልክታት ጠፊኡ"],
+"ጨዋታ አልተጀመረም":["The game hasn't started","Taphni hin jalqabne","ጸወታ ኣይጀመረን"],
+"ውሸት ቢንጎ! ካርድ ተቆልፏል":["False Bingo! Card blocked","Bingoon sobaa! Kaartiin cufameera","ሓሶት ቢንጎ! ካርድ ተዓጺዩ"],
+"ቢንጎ! ሌሎች ለ30 ሰከንድ ቢንጎ ማለት ይችላሉ":["Bingo! Others can call Bingo for 30 seconds","Bingoo! Warri kaan sekondii 30f bingoo jechuu danda'u","ቢንጎ! ካልኦት ን30 ካልኣይ ቢንጎ ክብሉ ይኽእሉ"],
+"ካርቴላው አልተገኘም":["Card not found","Kaartelaan hin argamne","እቲ ካርተላ ኣይተረኽበን"],
+"ካርቴላ: {}":["Card: {}","Kaartelaa: {}","ካርተላ: {}"],
+"ስልክ: {}":["Phone: {}","Bilbila: {}","ተሌፎን: {}"],
+"የመጨረሻ ቁጥር: {}":["Last number: {}","Lakkoofsa dhumaa: {}","ናይ መወዳእታ ቁጽሪ: {}"],
+"ካርቴላ ጠፍቷል — {} ብር ተመልሷል":["Card deleted — {} Birr refunded","Kaartelaan haqameera — Birrii {} deebi'eera","ካርተላ ጠፊኡ — {} ብር ተመሊሱ"],
+"ዳግም ያስጀምሩ":["Please reset first","Maaloo dura haaromsaa","ዳግማይ ኣጀምሩ"],
+"ጨዋታ ተጀምሯል":["Game started","Taphni jalqabeera","ጸወታ ተጀሚሩ"],
+"ጨዋታውን ዳግም ላስጀምር? የተገዙ ካርቴላዎች ይጠፋሉ (ገንዘብ አይመለስም)።":["Reset the game? Bought cards will be deleted (money is not refunded).","Taphicha haaromsuu? Kaartelaan bitaman ni haqamu (maallaqni hin deebi'u).","ጸወታ ዳግማይ ልጀምር? ዝተገዝኡ ካርተላታት ይጠፍኡ (ገንዘብ ኣይምለስን)።"],
+"ስህተት፦ {}":["Error: {}","Dogoggora: {}","ጌጋ: {}"],
+"ስህተት፦ SQL አልተሄደም? {}":["Error: was the SQL run? {}","Dogoggora: SQL hin hojjetamnee? {}","ጌጋ: SQL ኣይተኻየደን ድዩ? {}"],
+"ጨዋታ ዳግም ተጀምሯል":["Game has been reset","Taphni haaromfameera","ጸወታ ዳግማይ ጀሚሩ"],
+"ምሳሌ":["Example","Fakkeenya","ኣብነት"],
+"ካርቴላ":["Cards","Kaartelaa","ካርተላ"],
+"ለአሸናፊ":["To winner","Mo'ataaf","ንዓዋቲ"],
+"የቤት ትርፍ":["House profit","Bu'aa mana taphaa","ትርፊ ቤት"],
+"ብር":["Birr","Birrii","ብር"],
+"ተጫዋቾች":["Players","Taphattoota","ተጻወቲ"],
+"ኳሶች":["Balls","Kubbaawwan","ኳሶታት"],
+"ትርፍ":["Profit","Bu'aa","ትርፊ"],
+"እሴቶቹን ያረጋግጡ":["Please check the values","Gatiiwwan mirkaneessaa","እቶም ዋጋታት ኣረጋግጹ"],
+"ተቀምጧል":["Saved","Olkaa'ameera","ተቐሚጡ"],
+"ተቀምጧል — ራስ-ሰር ጨዋታ በርቷል":["Saved — auto game is ON","Olkaa'ameera — taphni ofumaa ifameera","ተቐሚጡ — ባዕላዊ ጸወታ ተኸፊቱ"],
+"ቢያንስ {} ብር":["At least {} Birr","Xiqqaatti Birrii {}","ብውሑዱ {} ብር"],
+"Txn ቁጥር ያስገቡ":["Enter the Txn number","Lakkoofsa Txn galchaa","Txn ቁጽሪ ኣእትዉ"],
+"ጥያቄ ተልኳል — አድሚን ያረጋግጣል":["Request sent — the admin will confirm","Gaaffiin ergameera — admiinichi mirkaneessa","ሕቶ ተላኢኹ — ኣድሚን የረጋግጽ"],
+"ጥያቄ ተልኳል":["Request sent","Gaaffiin ergameera","ሕቶ ተላኢኹ"],
+"ስልክ ያስገቡ":["Enter the phone number","Bilbila galchaa","ተሌፎን ኣእትዉ"],
+"ለራስዎ መላክ አይቻልም":["You can't send to yourself","Of keessaniif ergu hin danda'amu","ንርእስኹም ምልኣኽ ኣይከኣልን"],
+"ይህ ስልክ ያለው ተጠቃሚ አልተገኘም":["No user with this phone was found","Fayyadamaan bilbila kana qabu hin argamne","እዚ ተሌፎን ዘለዎ ተጠቃሚ ኣይተረኽበን"],
+"{} ብር ወደ {} ({}) ይላክ?":["Send {} Birr to {} ({})?","Birrii {} gara {} ({}) haa ergamu?","{} ብር ናብ {} ({}) ይለኣኽ?"],
+"ስህተት — እንደገና ይሞክሩ":["Error — try again","Dogoggora — irra deebi'ii yaalaa","ጌጋ — ከም ብሓድሽ ፈትኑ"],
+"{} ብር ወደ {} ተልኳል":["{} Birr sent to {}","Birrii {} gara {} ergameera","{} ብር ናብ {} ተላኢኹ"],
+"ጥያቄው ቀድሞ ተሰርቷል":["This request was already processed","Gaaffiin kun duraan raawwatameera","እዚ ሕቶ ቅድሚ ሕጂ ተገይሩ"],
+"ስህተት — ሒሳብ መጨመር አልተቻለም":["Error — couldn't add to the bal
