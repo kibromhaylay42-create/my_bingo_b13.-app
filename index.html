@@ -817,7 +817,13 @@ html.light .hp{background:#eef3f8;color:#5f87ad}
 // ===================== SUPABASE =====================
 const SUPA_URL = 'https://qtblapsrlbngbcpccwvj.supabase.co';
 const SUPA_KEY = 'sb_publishable_KCnZZgxrW4yCFo5CG-vDRg_fRxeOQyD';
-const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+let B13_TOK = sessionStorage.getItem('b13_tok') || '';
+const sb = supabase.createClient(SUPA_URL, SUPA_KEY, { global: { fetch: (u, o = {}) => {
+  const h = new Headers(o.headers || {}); if (B13_TOK) h.set('x-b13-token', B13_TOK);
+  return fetch(u, { ...o, headers: h });
+} } });
+function setSession(t) { B13_TOK = t || ''; if (t) sessionStorage.setItem('b13_tok', t); else sessionStorage.removeItem('b13_tok'); sessionStorage.removeItem('b13_uid'); }
+function loginWith(r) { clearInterval(otpTick); setSession(r.token); cur = r.user; enter(); }
 const TG_LINK = 'https://t.me/'; // <- የቴሌግራም ሊንክዎን እዚህ ያስገቡ
 
 // ===================== STATE =====================
@@ -1071,9 +1077,4 @@ const I18N = {
 "ትክክለኛ ስልክ (09xxxxxxxx)":["Valid phone (09xxxxxxxx)","Bilbila sirrii (09xxxxxxxx)","ቅኑዕ ተሌፎን (09xxxxxxxx)"],
 "የይለፍ ቃል ቢያንስ 4 ቁምፊ መሆን አለበት":["Password must be at least 4 characters","Jechi iggitaa xiqqaatti qubee 4 ta'uu qaba","መሕለፊ ቃል ብውሑዱ 4 ፊደል ክኸውን ኣለዎ"],
 "የይለፍ ቃል ቢያንስ 4 ቁምፊ":["Password must be at least 4 characters","Jechi iggitaa xiqqaatti qubee 4","መሕለፊ ቃል ብውሑዱ 4 ፊደል"],
-"የይለፍ ቃሉ አይመሳሰልም":["Passwords do not match","Jechoonni iggitaa wal hin fakkaatan","መሕለፊ ቃላት ኣይመሳሰሉን"],
-"ስልኩ ቀድሞ ተመዝግቧል":["This phone is already registered","Bilbilli kun duraan galmaa'eera","እዚ ተሌፎን ቅድሚ ሕጂ ተመዝጊቡ"],
-"ስህተት ተፈጥሯል":["An error occurred","Dogoggorri uumameera","ጌጋ ተፈጢሩ"],
-"ተመዝግበዋል — ይግቡ":["Registered — please log in","Galmaa'aniirtu — seenaa","ተመዝጊብኩም — እተዉ"],
-"የባለቤት መለያ ተፈጥሯል — ይግቡ":["Owner account created — log in","Herregni abbaa qabeenyaa uumameera — seenaa","ናይ ወናኒ ኣካውንት ተፈጢሩ — እተዉ"],
-"ከፍተኛው {} ካርድ":["Maximum
+"የይለፍ ቃሉ አይመሳሰልም":["Passwords do not ma
