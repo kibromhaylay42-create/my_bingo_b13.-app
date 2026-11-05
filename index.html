@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>B13 Bingo</title>
+<script>
+setTimeout(function(){var x=document.getElementById('splash');if(x&&!window.__b13ok){x.innerHTML='<div style="color:#fff;text-align:center;padding:24px;font-family:sans-serif">Loading failed. Check your internet connection and reload.<br><br><button onclick="location.reload()" style="padding:10px 18px;border-radius:12px;border:0;background:#fbbf24;font-weight:800">Reload</button></div>';}},9000);
+window.addEventListener('error',function(e){console.error('B13 error',e.message);});
+</script>
 <script src="https://cdn.tailwindcss.com/3.4.17"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Inter:wght@400;600;800&family=Noto+Sans+Ethiopic:wght@400;600;800&display=swap" rel="stylesheet">
@@ -1077,9 +1081,4 @@ const I18N = {
 "ጥያቄ ተልኳል":["Request sent","Gaaffiin ergameera","ሕቶ ተላኢኹ"],
 "ስልክ ያስገቡ":["Enter the phone number","Bilbila galchaa","ተሌፎን ኣእትዉ"],
 "ለራስዎ መላክ አይቻልም":["You can't send to yourself","Of keessaniif ergu hin danda'amu","ንርእስኹም ምልኣኽ ኣይከኣልን"],
-"ይህ ስልክ ያለው ተጠቃሚ አልተገኘም":["No user with this phone was found","Fayyadamaan bilbila kana qabu hin argamne","እዚ ተሌፎን ዘለዎ ተጠቃሚ ኣይተረኽበን"],
-"{} ብር ወደ {} ({}) ይላክ?":["Send {} Birr to {} ({})?","Birrii {} gara {} ({}) haa ergamu?","{} ብር ናብ {} ({}) ይለኣኽ?"],
-"ስህተት — እንደገና ይሞክሩ":["Error — try again","Dogoggora — irra deebi'ii yaalaa","ጌጋ — ከም ብሓድሽ ፈትኑ"],
-"{} ብር ወደ {} ተልኳል":["{} Birr sent to {}","Birrii {} gara {} ergameera","{} ብር ናብ {} ተላኢኹ"],
-"ጥያቄው ቀድሞ ተሰርቷል":["This request was already processed","Gaaffiin kun duraan raawwatameera","እዚ ሕቶ ቅድሚ ሕጂ ተገይሩ"],
-"ስህተት — ሒሳብ መጨመር አልተቻለም":["Error — couldn't add to the bal
+"ይህ ስልክ ያለው ተጠቃሚ አልተገኘም":["No user with this phone was found","Fayyadamaan bilbila kana qabu hin argamne","
