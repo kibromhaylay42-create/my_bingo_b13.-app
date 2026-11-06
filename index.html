@@ -293,7 +293,53 @@ html.light .hp{background:#eef3f8;color:#5f87ad}
 @keyframes spd{0%,100%{transform:translateY(0);opacity:.5}40%{transform:translateY(-10px);opacity:1}}
 .sp-foot{position:absolute;bottom:calc(22px + env(safe-area-inset-bottom,0px));color:rgba(255,255,255,.45);font-size:11px}
 @media (prefers-reduced-motion:reduce){.sp-orb,.sp-ball,.sp-logo,.sp-ring,.sp-title,.sp-dots i{animation:none!important}}
+
+/* ===================== v27 — compact nav, modern toggle ===================== */
+:root{--nav-h:52px}
+#bnav{height:calc(var(--nav-h) + env(safe-area-inset-bottom,0px));transition:transform .28s cubic-bezier(.2,.7,.2,1)}
+#bnav.nav-hide{transform:translateY(105%)}
+#bnav button{padding:5px 0 7px;font-size:10px;gap:1px}
+#bnav button i{font-size:19px}
+#bnav button.on::after{height:3px}
+#bnav .mid i{width:42px;height:42px;margin-top:-16px;font-size:20px}
+#app main{padding-bottom:calc(var(--nav-h) + 14px)}
+#fabWrap,#floatBall{bottom:calc(var(--nav-h) + 10px + env(safe-area-inset-bottom,0px))}
+#app.bf #cards{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px) + 16px)}
+#app.bf #topWrap{max-height:40dvh}
+.infotg{display:inline-flex;align-items:center;gap:6px;padding:6px 12px 6px 14px;border-radius:999px;font-size:12px;font-weight:600;letter-spacing:.02em;color:#2a6aa8;background:#fff;border:1px solid #dbe3ec;box-shadow:0 1px 2px rgba(20,60,100,.12),0 4px 12px rgba(20,60,100,.08);transition:transform .15s}
+.infotg svg{width:14px;height:14px;transition:transform .3s cubic-bezier(.2,.7,.2,1)}
+.infotg:not(.open) svg{transform:rotate(180deg)}
+.infotg:active{transform:scale(.94)}
+html:not(.light) .infotg{background:rgba(255,255,255,.08);color:#c7d2fe;border-color:rgba(255,255,255,.14);box-shadow:none;backdrop-filter:blur(8px)}
+.exp-only:not(.hidden){animation:rise .3s cubic-bezier(.2,.7,.2,1) both}
+@media (prefers-reduced-motion:reduce){#bnav,.infotg svg,.exp-only:not(.hidden){animation:none!important;transition:none!important}}
+
+/* ===================== v28 — profile page ===================== */
+.pf-hero{display:flex;align-items:center;gap:14px;padding:20px 18px 46px;border-radius:24px;background:linear-gradient(135deg,#21557f,#2a6aa8 55%,#6a7fe0);color:#fff}
+.pf-av{width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.65);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;flex:none;text-transform:uppercase}
+.pf-name{font-size:19px;font-weight:700;line-height:1.2;word-break:break-word}
+.pf-sub{font-size:13px;opacity:.88;margin-top:2px}
+.pf-role{display:inline-block;margin-top:6px;padding:3px 10px;border-radius:999px;background:rgba(255,255,255,.2);font-size:11px;font-weight:700}
+.pf-bal{margin:-28px 10px 0!important;position:relative;box-shadow:0 10px 28px rgba(20,60,100,.14)!important}
+.pf-amt{font-size:32px;font-weight:800;letter-spacing:-.5px;line-height:1.15;color:#1d3f63}.pf-amt small{font-size:14px;font-weight:600;opacity:.6}
+.pf-act{display:flex;flex-direction:column;align-items:center;gap:4px;padding:11px 4px;border-radius:14px;background:#eef3f8;color:#2a6aa8;font-size:12px;font-weight:600}
+.pf-act i{font-style:normal;font-size:20px;line-height:1}.pf-act:active{transform:scale(.95)}
+.pf-stat{display:flex;flex-direction:column;align-items:center;padding:14px 8px;gap:2px}.pf-stat b{font-size:24px;color:#2a6aa8}.pf-stat span{font-size:12px;opacity:.7}
+.pf-list{padding:4px 0;overflow:hidden}
+.prow{display:flex;align-items:center;gap:12px;width:100%;padding:13px 16px;text-align:left;font-size:14px;font-weight:500;border:0;border-bottom:1px solid rgba(120,140,170,.18);background:none;color:inherit}
+.prow:last-child{border-bottom:0}.prow:active{background:rgba(120,140,170,.1)}
+.prow i{font-style:normal;width:34px;height:34px;border-radius:11px;background:#eef3f8;display:flex;align-items:center;justify-content:center;font-size:17px;flex:none}
+.prow span{flex:1}.prow em{font-style:normal;opacity:.4;font-size:20px}
+html:not(.light) .pf-hero{background:linear-gradient(135deg,#312e81,#6d28d9 60%,#c026d3)}
+html:not(.light) .pf-amt{color:#fff}html:not(.light) .pf-act,html:not(.light) .prow i{background:rgba(255,255,255,.08);color:#c7d2fe}html:not(.light) .pf-stat b{color:#c7d2fe}
+#pg-profile{animation:rise .38s cubic-bezier(.2,.7,.2,1) both}
 </style>
+<link rel="icon" type="image/png" href="icons/favicon.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#21557f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 </head>
 <body>
 
@@ -365,7 +411,7 @@ html.light .hp{background:#eef3f8;color:#5f87ad}
   <header class="grad px-4 py-3 flex items-center justify-between flex-none"><b class="text-white tracking-wide text-2xl">🎱 B13</b><span id="hBal" class="text-[11px] font-bold bg-white/20 rounded-full px-2.5 py-1 text-white"></span></header>
 
   <div id="topWrap" class="flex-none">
-    <div class="flex justify-end px-2 pb-1"><button id="btnInfoToggle" onclick="setPref('showInfo',!prefs.showInfo)" class="text-red-400 font-bold text-sm">⌃ Show Less</button></div>
+    <div class="flex justify-end px-2 pb-1"><button id="btnInfoToggle" onclick="setPref('showInfo',!prefs.showInfo)" class="infotg open"><span class="lbl">Show Less</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg></button></div>
     <div id="ballStrip" class="hidden glass p-3 mb-2">
       <div class="flex justify-between items-center mb-2"><b class="text-[15px]">የወጡ ቁጥሮች:</b><span class="text-[12px] text-slate-400"><span>የወጡ ኳሶች ብዛት:</span> <span id="stripCnt">0</span></span></div>
       <div id="stripRow" class="flex items-center gap-2.5 overflow-x-auto pb-1"></div>
@@ -455,6 +501,42 @@ html.light .hp{background:#eef3f8;color:#5f87ad}
         <button id="avBtn" class="cta" onclick="avAct()">ውርርድ አድርግ</button>
         <p id="avMsg" class="text-center text-xs min-h-[16px]" style="color:var(--mu)"></p>
       </div>
+    </div>
+
+    <div id="pg-profile" class="hidden max-w-lg mx-auto space-y-3">
+      <div class="pf-hero"><div class="pf-av" id="pfAv">👤</div><div class="min-w-0"><div id="pfName" class="pf-name"></div><div class="pf-sub">📞 <span id="pfPhone"></span></div><span id="pfRole" class="pf-role"></span></div></div>
+      <div class="card pf-bal p-4">
+        <div class="text-xs text-slate-400">ጠቅላላ ሒሳብ</div>
+        <div class="pf-amt"><span id="pfBal">0</span> <small>ብር</small></div>
+        <div class="grid grid-cols-3 gap-2 mt-3">
+          <button class="pf-act" onclick="openWallet('dep')"><i>⊕</i>ማስገባት</button>
+          <button class="pf-act" onclick="openWallet('wd')"><i>⊖</i>ማውጣት</button>
+          <button class="pf-act" onclick="openWallet('tr')"><i>⇄</i>ብር ላክ</button>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <div class="card pf-stat"><b id="pfCards">0</b><span>የእኔ ካርቴላ</span></div>
+        <div class="card pf-stat"><b id="pfWon">0</b><span>አሸናፊ ካርቴላ</span></div>
+      </div>
+      <div class="card pf-list">
+        <button class="prow" onclick="openWallet('hist')"><i>🕘</i><span>የግብይት ታሪክ</span><em>›</em></button>
+        <button class="prow" onclick="openDrawer()"><i>⚙️</i><span>ሴቲንግ እና ማሳወቂያ</span><em>›</em></button>
+        <button class="prow" onclick="document.getElementById('pwBox').classList.toggle('hidden')"><i>🔑</i><span>የይለፍ ቃል ቀይር</span><em>›</em></button>
+        <button class="prow" onclick="openM('mRules')"><i>📘</i><span>የጨዋታ ደንቦችና ሕጎች</span><em>›</em></button>
+        <button class="prow" onclick="window.open(TG_LINK,'_blank')"><i>✈️</i><span>Telegram — ያግኙን</span><em>›</em></button>
+        <button class="prow" onclick="copy('0987215758')"><i>📱</i><span>0987215758 (ቅዳ)</span><em>›</em></button>
+        <button id="pfAdm" class="prow hidden" onclick="go('admin')"><i>🛡️</i><span>አድሚን ፓነል</span><em>›</em></button>
+        <button id="pfOwn" class="prow hidden" onclick="go('owner')"><i>👑</i><span>ኦነር ዳሽቦርድ</span><em>›</em></button>
+      </div>
+      <div id="pwBox" class="card p-4 space-y-2 hidden">
+        <div class="font-bold text-sm">🔑 የይለፍ ቃል ቀይር</div>
+        <input id="pwOld" type="password" class="inp" placeholder="የአሁኑ የይለፍ ቃል" autocomplete="current-password">
+        <input id="pwNew" type="password" class="inp" placeholder="አዲስ የይለፍ ቃል (ቢያንስ 4)" autocomplete="new-password">
+        <input id="pwNew2" type="password" class="inp" placeholder="አዲሱን ድገም" autocomplete="new-password">
+        <button class="btn b-p" onclick="changePw()">አስቀምጥ</button>
+      </div>
+      <button class="btn b-bad" onclick="logout()">⎋ Logout</button>
+      <p class="text-center text-[11px] text-slate-400 pb-2">B13 Bingo · v28</p>
     </div>
 
     <div id="pg-wallet" class="hidden space-y-3 max-w-lg mx-auto">
@@ -652,7 +734,7 @@ html.light .hp{background:#eef3f8;color:#5f87ad}
     <button data-p="wallet" onclick="go('wallet')"><i>👛</i>ዋሌት</button>
     <button class="mid" onclick="go('keno')"><i>🎮</i>ጨዋታዎች</button>
     <button onclick="openM('mSet')"><i>⚙️</i>ቅንብር</button>
-    <button onclick="openDrawer()"><i>☰</i>ምናሌ</button>
+    <button data-p="profile" onclick="go('profile')"><i>👤</i>ፕሮፋይል</button>
   </nav>
 </div>
 
@@ -1356,7 +1438,7 @@ function applyPrefs() {
   t('tgNotify', prefs.notify); t('tgSound', prefs.sound); t('tgMarkAll', prefs.markAll); t('tgAutoMark', prefs.autoMark); t('tgVoice', prefs.voice);
   document.querySelectorAll('.exp-only').forEach(e => e.classList.toggle('hidden', !prefs.showInfo));
   if ($('ballStrip')) $('ballStrip').classList.toggle('hidden', prefs.showInfo);
-  const bt = $('btnInfoToggle'); if (bt) bt.textContent = prefs.showInfo ? '⌃ Show Less' : '⌄ Show More';
+  const bt = $('btnInfoToggle'); if (bt) { bt.classList.toggle('open', !!prefs.showInfo); const lb = bt.querySelector('.lbl'); if (lb) lb.textContent = prefs.showInfo ? 'Show Less' : 'Show More'; }
   const s = (id, v) => $(id) && ($(id).value = v);
   s('sCols', prefs.cols); s('sOrder', prefs.order); s('sColor', prefs.color);
   s('sGs', prefs.gs); s('sTheme', prefs.theme); s('sLang', prefs.lang);
@@ -1609,13 +1691,15 @@ const GAME_ON = { keno: false, avatar: false };
 function go(p) {
   if (p in GAME_ON && !GAME_ON[p]) return toast('🔜 ' + (p === 'keno' ? 'Keno' : 'Avatar') + ' በቅርቡ ይጀምራል!');
   page = p;
+  document.getElementById('bnav')?.classList.remove('nav-hide');
   document.querySelectorAll('#bnav [data-p]').forEach(b => b.classList.toggle('on', b.dataset.p === p));
   $('app').classList.toggle('bf', p === 'bingo' && prefs.scrollMode === 'cards');
-  ['bingo','wallet','admin','owner','keno','avatar'].forEach(x => $('pg-'+x).classList.toggle('hidden', x !== p));
+  ['bingo','wallet','admin','owner','keno','avatar','profile'].forEach(x => $('pg-'+x).classList.toggle('hidden', x !== p));
   $('topWrap').classList.toggle('hidden', p !== 'bingo');
   $('fabWrap').classList.toggle('hidden', p !== 'bingo');
   if (p === 'admin') applyAdmTab();
   if (p === 'keno') kenoInit();
+  if (p === 'profile') renderProfile();
   if (p === 'avatar') avStart(); else avStop();
   render();
 }
@@ -2213,15 +2297,51 @@ async function applyCfg() {
 }
 
 // ===================== FINANCE (user) =====================
+
+// ===================== PROFILE =====================
+function renderProfile() {
+  if (!cur) return;
+  const nm = (cur.name || '').trim(), cards = typeof myCards !== 'undefined' ? myCards : [];
+  $('pfAv').textContent = [...nm][0] || '👤';
+  $('pfName').textContent = nm; $('pfPhone').textContent = cur.phone;
+  $('pfRole').textContent = cur.role === 'OWNER' ? '👑 ባለቤት' : cur.role === 'ADMIN_FINANCE' ? '💰 የሒሳብ አድሚን' : cur.role === 'ADMIN_GAME' ? '🎮 የጨዋታ አድሚን' : 'ተጫዋች';
+  $('pfBal').textContent = fmt(cur.balance);
+  $('pfCards').textContent = cards.length; $('pfWon').textContent = cards.filter(c => c.won).length;
+  $('pfAdm').classList.toggle('hidden', !['OWNER', 'ADMIN_GAME', 'ADMIN_FINANCE'].includes(cur.role));
+  $('pfOwn').classList.toggle('hidden', cur.role !== 'OWNER');
+}
+async function changePw() {
+  const o = $('pwOld').value, n = $('pwNew').value, n2 = $('pwNew2').value;
+  if (!o) return toast('የአሁኑን የይለፍ ቃል ያስገቡ', 'e');
+  if (n.length < 4) return toast('አዲስ የይለፍ ቃል ቢያንስ 4 ቁምፊ', 'e');
+  if (n !== n2) return toast('አዲሱ የይለፍ ቃል አይመሳሰልም', 'e');
+  const { data: salt0 } = await sb.rpc('get_salt', { p_phone: cur.phone });
+  const oldHash = await hashPw(o, salt0), salt = newSalt(), hash = await hashPw(n, salt);
+  const { data: r, error } = await sb.rpc('change_password', { p_old_hash: oldHash, p_salt: salt, p_hash: hash });
+  if (error) return toast(isSchemaErr(error) ? 'security_setup.sql ገና አልተሰራም' : 'ስህተት — እንደገና ይሞክሩ', 'e');
+  if (!r.ok) return toast(r.error === 'LOCKED' ? 'ብዙ ሙከራ — ከ10 ደቂቃ በኋላ ይሞክሩ' : 'የአሁኑ የይለፍ ቃል ትክክል አይደለም', 'e');
+  $('pwOld').value = $('pwNew').value = $('pwNew2').value = '';
+  $('pwBox').classList.add('hidden');
+  toast('✓ የይለፍ ቃል ተቀይሯል');
+}
+
+let _depBusy = false;
 async function deposit() {
+  if (_depBusy) return;
   const amt = parseFloat($('dAmt').value), ref = extractRef($('dRef').value) || ($('dRef').value || '').trim().toUpperCase();
   if (!(amt >= 50)) return toast('ቢያንስ 50 ብር', 'e');
   if (!ref) return toast('Txn ቁጥር ያስገቡ', 'e');
-  const { error } = await sb.from('transactions').insert({ user_id: cur.id, type: 'DEPOSIT', amount: amt, method: $('dMethod').value, ref, status: 'PENDING' });
-  if (error) return toast(error.code === '23505' ? 'ይህ Txn ቁጥር ቀድሞ ገብቷል' : 'ስህተት', 'e');
-  $('dAmt').value = $('dRef').value = '';
-  toast('ጥያቄ ተልኳል — አድሚን ያረጋግጣል', 'i');
-  renderMyTx();
+  _depBusy = true;
+  try {
+    const { error } = await sb.rpc('deposit_req', { p_amount: amt, p_method: $('dMethod').value, p_ref: ref });
+    if (error) {
+      const m = error.message || '';
+      return toast(m.includes('DUPLICATE') ? 'ይህ Txn ቁጥር ቀድሞ ተልኳል — ድጋሚ መላክ አይቻልም' : m.includes('MIN_AMOUNT') ? 'ቢያንስ 50 ብር' : isSchemaErr(error) ? 'security_setup.sql ገና አልተሰራም' : 'ስህተት', 'e');
+    }
+    $('dAmt').value = $('dRef').value = '';
+    toast('ጥያቄ ተልኳል — አድሚን ያረጋግጣል', 'i');
+    renderMyTx();
+  } finally { _depBusy = false; }
 }
 
 async function withdraw() {
@@ -2440,6 +2560,7 @@ function render() {
   $('hBal').textContent = fmt(cur.balance) + ' ብር';
   $('dName').textContent = cur.name;
   $('dPhone').textContent = cur.phone;
+  if (page === 'profile') renderProfile();
   $('fabHint').textContent = fmt(canEdit() ? gamePrice() : nextPrice()) + ' ብር/ካርድ';
 
   const drawn = game?.drawn || [];
@@ -2874,6 +2995,18 @@ function copy(v) {
     .catch(() => prompt('Copy:', v));
 }
 
+(function () {
+  const last = new WeakMap();
+  document.addEventListener('scroll', e => {
+    const t = e.target === document ? document.scrollingElement : e.target;
+    if (!t || t.scrollTop === undefined) return;
+    const y = t.scrollTop, d = y - (last.get(t) || 0);
+    if (Math.abs(d) < 10) return;
+    last.set(t, y);
+    const n = document.getElementById('bnav'); if (!n) return;
+    n.classList.toggle('nav-hide', d > 0 && y > 60);
+  }, true);
+})();
 window.addEventListener('load', async () => {
   applyPrefs();
   await loadSettings();
